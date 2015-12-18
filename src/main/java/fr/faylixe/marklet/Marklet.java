@@ -16,6 +16,9 @@ import com.sun.javadoc.*;
 public final class Marklet implements IGenerationContext {
 
 	/** **/
+	public static final String FILE_EXTENSION = ".md";
+
+	/** **/
 	private final RootDoc root;
 
 	/** **/
@@ -33,7 +36,7 @@ public final class Marklet implements IGenerationContext {
 	/**
 	 * Default constructor.
 	 * 
-	 * @param delegate
+	 * @param options
 	 * @param root
 	 */
 	private Marklet(final MarkletOptions options, final RootDoc root) {
@@ -41,7 +44,7 @@ public final class Marklet implements IGenerationContext {
 		this.classes = new HashSet<String>();
 		this.sourcePath = options.getSourcePath();
 		this.documentationPath = options.getDocumentationPath();
-		this.outputDirectory = ""; // TODO : Retrives from options.
+		this.outputDirectory = "markdoc/"; // TODO : Retrives from options.
 	}
 
 	/** {@inheritDoc} **/
@@ -59,25 +62,73 @@ public final class Marklet implements IGenerationContext {
 		return outputDirectory;
 	}
 
-	/**
-	 * 
-	 */
-	private void indexClasses() {
-		root.printNotice("Indexing classes");
-		for (final ClassDoc classDoc : root.classes()) {
-			classes.add(classDoc.name());
+	/** {@inheritDoc} **/
+	public String getClassURL(final String qualifiedName) {
+		final StringBuilder urlBuilder = new StringBuilder();
+		if (classes.contains(qualifiedName)) {
+			urlBuilder.append(getDocumentationPath());
+			urlBuilder.append(qualifiedName.replace('.', '/'));
+			urlBuilder.append(".md");
 		}
-		root.printNotice(classes.size() + " class discovered, starting generation.");
+		return urlBuilder.toString();
 	}
 	
 	/**
-	 * @throws IOException 
+	 * Builds and retrieves the path for the
+	 * directory associated to the package
+	 * with the given <tt>name</tt>.
 	 * 
+	 * @param name Name of the package to get directory for.
+	 * @return Built path.
 	 */
-	private void generateClasses() throws IOException {
-		final ClassPageBuilder builder = new ClassPageBuilder(this);
+	private Path getPackageDirectory(final String packageName) {
+		final String directory = packageName.replace('.', '/');
+		final String path = new StringBuilder()
+			.append(outputDirectory)
+			.append(directory)
+			.toString();
+		return Paths.get(path);
+	}
+
+	/**
+	 * Generates package documentation for the given
+	 * <tt>packageDoc</tt>.
+	 * 
+	 * @param packageDoc Package to generate documentation for.
+	 * @throws IOException If any error occurs while creating file or directories.
+	 */
+	private Path generatePackage(final PackageDoc packageDoc) throws IOException {
+		final String name = packageDoc.name();
+		root.printNotice("Generates package documentation for " + name);
+		if (!name.isEmpty()) {
+			final Path directoryPath = getPackageDirectory(name);
+			if (!Files.exists(directoryPath)) {
+				Files.createDirectories(directoryPath);
+			}
+			PackagePageBuilder.build(directoryPath, packageDoc);
+			return directoryPath;
+		}
+		return Paths.get(".");
+	}
+
+	/**
+	 * Builds the javadoc, for each available classes
+	 * and associated package.
+	 * 
+	 * @throws IOException If any error occurs during generation process.
+	 */
+	private void build() throws IOException {
+		final Set<PackageDoc> packages = new HashSet<PackageDoc>();
 		for (final ClassDoc classDoc : root.classes()) {
-			builder.build(classDoc);
+			final PackageDoc packageDoc = classDoc.containingPackage();
+			if (!packages.contains(packageDoc)) {
+				packages.add(packageDoc);
+				final Path directoryPath = generatePackage(packageDoc);			
+				ClassPageBuilder.build(classDoc, directoryPath);
+			}
+			else {
+				ClassPageBuilder.build(classDoc, getPackageDirectory(packageDoc.name()));				
+			}
 		}
 	}
 
@@ -86,26 +137,26 @@ public final class Marklet implements IGenerationContext {
 	 * @return
 	 */
 	private boolean start() {
-		indexClasses();
 		try {
 			final Path outputDirectory = Paths.get(getOutputDirectory());
 			if (!Files.exists(outputDirectory)) {
 				Files.createDirectories(outputDirectory);
 			}
-			generateClasses();
+			build();
 		}
 		catch (final IOException e) {
 			root.printError(e.getMessage());
-			e.printStackTrace();
 			return false;
 		}
 		return true;
 	}
 
 	/**
+	 * Doclet entry point. Parses user provided options
+	 * and starts a Marklet execution.
 	 * 
-	 * @param root
-	 * @return
+	 * @param root Doclet API root.
+	 * @return <tt>true</tt> if the generation went well, <tt>false<tt> otherwise.
 	 */
 	public static boolean start(final RootDoc root) {
 		final MarkletOptions options = MarkletOptions.parse(root.options());

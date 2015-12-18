@@ -24,4 +24,11 @@ public interface IGenerationContext {
 	 */
 	String getOutputDirectory();
 
+	/**
+	 * 
+	 * @param qualifiedName
+	 * @return
+	 */
+	String getClassURL(String qualifiedName);
+
 }
