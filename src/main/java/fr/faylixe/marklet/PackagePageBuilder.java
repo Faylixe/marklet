@@ -24,6 +24,7 @@ public final class PackagePageBuilder {
 		final Path readmePath = target.resolve("README.md");
 		final StringBuilder overviewBuilder = new StringBuilder();
 		overviewBuilder.append("# Package " + packageDoc.name());
+		overviewBuilder.append("\n\n");
 		overviewBuilder.append(packageDoc.commentText());
 		final String overview = overviewBuilder.toString();
 		Files.copy(new ByteArrayInputStream(overview.getBytes()), readmePath, StandardCopyOption.REPLACE_EXISTING);

@@ -22,7 +22,7 @@ public final class Marklet implements IGenerationContext {
 	private final RootDoc root;
 
 	/** **/
-	private final Set<String> classes;
+	private final Set<ClassDoc> classes;
 
 	/** **/
 	private final String sourcePath;
@@ -41,10 +41,10 @@ public final class Marklet implements IGenerationContext {
 	 */
 	private Marklet(final MarkletOptions options, final RootDoc root) {
 		this.root = root;
-		this.classes = new HashSet<String>();
+		this.classes = new HashSet<ClassDoc>();
 		this.sourcePath = options.getSourcePath();
 		this.documentationPath = options.getDocumentationPath();
-		this.outputDirectory = "markdoc/"; // TODO : Retrives from options.
+		this.outputDirectory = "javadoc/"; // TODO : Retrives from options.
 	}
 
 	/** {@inheritDoc} **/
@@ -68,7 +68,7 @@ public final class Marklet implements IGenerationContext {
 		if (classes.contains(qualifiedName)) {
 			urlBuilder.append(getDocumentationPath());
 			urlBuilder.append(qualifiedName.replace('.', '/'));
-			urlBuilder.append(".md");
+			urlBuilder.append(FILE_EXTENSION);
 		}
 		return urlBuilder.toString();
 	}
@@ -112,23 +112,34 @@ public final class Marklet implements IGenerationContext {
 	}
 
 	/**
-	 * Builds the javadoc, for each available classes
-	 * and associated package.
 	 * 
-	 * @throws IOException If any error occurs during generation process.
+	 * @throws IOException
 	 */
-	private void build() throws IOException {
+	private void buildIndex() throws IOException {
 		final Set<PackageDoc> packages = new HashSet<PackageDoc>();
 		for (final ClassDoc classDoc : root.classes()) {
 			final PackageDoc packageDoc = classDoc.containingPackage();
 			if (!packages.contains(packageDoc)) {
 				packages.add(packageDoc);
-				final Path directoryPath = generatePackage(packageDoc);			
-				ClassPageBuilder.build(classDoc, directoryPath);
+				classes.add(classDoc);
+				generatePackage(packageDoc);
 			}
-			else {
-				ClassPageBuilder.build(classDoc, getPackageDirectory(packageDoc.name()));				
-			}
+		}
+	}
+
+	/**
+	 * Builds the javadoc, for each available classes
+	 * and associated package.
+	 * 
+	 * @throws IOException If any error occurs during generation process.
+	 */
+	private void buildClasses() throws IOException {
+		for (final ClassDoc classDoc : root.classes()) {
+			final PackageDoc packageDoc = classDoc.containingPackage();
+			final String packageName = packageDoc.name();
+			final Path packageDirectory = getPackageDirectory(packageName);
+			root.printNotice("Generates documentation for " + classDoc.name());
+			ClassPageBuilder.build(this, classDoc, packageDirectory);				
 		}
 	}
 
@@ -142,7 +153,8 @@ public final class Marklet implements IGenerationContext {
 			if (!Files.exists(outputDirectory)) {
 				Files.createDirectories(outputDirectory);
 			}
-			build();
+			buildIndex();
+			buildClasses();
 		}
 		catch (final IOException e) {
 			root.printError(e.getMessage());

@@ -15,6 +15,12 @@ import com.sun.javadoc.Type;
  * @author fv
  */
 public final class DocumentBuilder {
+	
+	/** **/
+	private static final String TABLE_HEADER = "--- | ---:";
+
+	/** **/
+	private static final String METHOD_SUMMARY_HEADER = "Return type | Signature";
 
 	/** **/
 	private final IGenerationContext context;
@@ -96,9 +102,9 @@ public final class DocumentBuilder {
 	 */
 	public void initializeMethodHeader() throws IOException {
 		writer.newLine();
-		writer.write("Return type | Signature");
+		writer.write(METHOD_SUMMARY_HEADER);
 		writer.newLine();
-		writer.write("--- | ---:");
+		writer.write(TABLE_HEADER);
 		writer.newLine();
 	}
 
@@ -153,13 +159,15 @@ public final class DocumentBuilder {
 	
 	/**
 	 * 
+	 * @param context
+	 * @param path
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
-	public static DocumentBuilder create(final Path path) throws IOException {
+	public static DocumentBuilder create(final IGenerationContext context, final Path path) throws IOException {
 		final FileWriter fileWriter = new FileWriter(path.toFile());
 		final BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-		return new DocumentBuilder(null, bufferedWriter);
+		return new DocumentBuilder(context, bufferedWriter);
 	}
 
 }

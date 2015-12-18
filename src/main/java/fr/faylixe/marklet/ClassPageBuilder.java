@@ -80,20 +80,22 @@ public final class ClassPageBuilder {
 	 * associated to the given <tt>classDoc</tt>
 	 * into the directory denoted by the given path.
 	 * 
+	 * @param context
 	 * @param classDoc Class to generated documentation for.
 	 * @param directoryPath Path of the directory to write documentation in.
 	 * @throws IOException If any error occurs while writing documentation.
 	 */
-	public static void build(final ClassDoc classDoc, final Path directoryPath) throws IOException {
+	public static void build(final IGenerationContext context, final ClassDoc classDoc, final Path directoryPath) throws IOException {
 		final Path classPath = Paths.get(
 				new StringBuilder()
 					.append(classDoc.simpleTypeName())
 					.append(Marklet.FILE_EXTENSION)
 					.toString());
-		final DocumentBuilder documentBuilder = DocumentBuilder.create(classPath);
+		final DocumentBuilder documentBuilder = DocumentBuilder.create(context, directoryPath.resolve(classPath));
 		final ClassPageBuilder builder = new ClassPageBuilder(documentBuilder, classDoc);
 		builder.buildHeader();
 		builder.buildSummary();
+		documentBuilder.build();
 	}
 
 }
