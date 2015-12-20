@@ -6,6 +6,9 @@ package fr.faylixe.marklet;
  */
 public interface IGenerationContext {
 
+	/** **/
+	static final String FILE_EXTENSION = ".md";
+
 	/**
 	 * 
 	 * @return
@@ -29,6 +32,35 @@ public interface IGenerationContext {
 	 * @param qualifiedName
 	 * @return
 	 */
-	String getClassURL(String qualifiedName);
+	boolean containsClass(final String qualifiedName);
+
+	/**
+	 * 
+	 * @param qualifiedName
+	 * @return
+	 */
+	default String getClassURL(final String qualifiedName) {
+		final StringBuilder urlBuilder = new StringBuilder();
+		if (containsClass(qualifiedName)) {
+			urlBuilder
+				.append(getDocumentationPath())
+				.append(getOutputDirectory())
+				.append(qualifiedName.replace('.', '/'))
+				.append(FILE_EXTENSION);
+		}
+		return urlBuilder.toString();
+	}
+
+	/**
+	 * 
+	 * @param qualifiedName
+	 * @return
+	 */
+	default String getPackageURL(final String qualifiedName) {
+		final StringBuilder urlBuilder = new StringBuilder();
+		urlBuilder.append(getDocumentationPath());
+		urlBuilder.append(qualifiedName.replace('.', '/'));
+		return urlBuilder.toString();
+	}
 
 }

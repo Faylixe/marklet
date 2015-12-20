@@ -1,4 +1,4 @@
-package fr.faylixe.marklet;
+package fr.faylixe.marklet.builder;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -8,7 +8,9 @@ import java.nio.file.Path;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.MethodDoc;
-import com.sun.javadoc.Type;
+
+import fr.faylixe.marklet.IGenerationContext;
+import fr.faylixe.marklet.MarkdownUtils;
 
 /**
  * 
@@ -17,10 +19,10 @@ import com.sun.javadoc.Type;
 public final class DocumentBuilder {
 	
 	/** **/
-	private static final String TABLE_HEADER = "--- | ---:";
+	private static final String TABLE_HEADER = "| --- | --- |";
 
 	/** **/
-	private static final String METHOD_SUMMARY_HEADER = "Return type | Signature";
+	private static final String METHOD_SUMMARY_HEADER = "| Type | Method |";
 
 	/** **/
 	private final IGenerationContext context;
@@ -40,19 +42,6 @@ public final class DocumentBuilder {
 	/**
 	 * 
 	 * @param label
-	 * @param url
-	 * @return
-	 */
-	private static String buildLink(final String label, final String url) {
-		return new StringBuilder()
-			.append('[').append(label).append(']')
-			.append('(').append(url).append(')')
-			.toString();
-	}
-
-	/**
-	 * 
-	 * @param label
 	 * @param level
 	 * @throws IOException
 	 */
@@ -61,6 +50,7 @@ public final class DocumentBuilder {
 			writer.write('#');
 		}
 		writer.write(label);
+		writer.newLine();
 		writer.newLine();
 	}
 
@@ -84,7 +74,7 @@ public final class DocumentBuilder {
 		ClassDoc current = leaf;
 		while (current != null) {
 			final String url = context.getClassURL(current.qualifiedName());
-			final String link = buildLink(current.name(), url);
+			final String link = MarkdownUtils.buildLink(current.name(), url);
 			hiearchyBuilder.insert(0, link);
 			current = current.superclass();
 			if (current != null) {
@@ -113,20 +103,19 @@ public final class DocumentBuilder {
 	 * @param method
 	 */
 	public void appendMethodHeader(final MethodDoc method) throws IOException  {
-		final Type type = method.returnType();
-		if (type.isPrimitive()) {
-			writer.write("**");
-			writer.write(type.simpleTypeName());
-			writer.write("**");
-		}
-		else {
-			final ClassDoc classDoc = type.asClassDoc();
-			final String url = context.getClassURL(classDoc.qualifiedName());
-			final String link = buildLink(classDoc.name(), url);
-			writer.write(link);
-		}
+		final MethodSignatureBuilder builder = new MethodSignatureBuilder(context, method);
+		writer.write("| ");
+		writer.write(builder.buildReturn());
 		writer.write(" | ");
-		writer.write(method.name()); // TODO : Build link;
+		writer.write(builder.buildName());
+		writer.write(" |");
+		writer.newLine();
+	}
+
+	/**
+	 * 
+	 */
+	public void newLine() throws IOException {
 		writer.newLine();
 	}
 
@@ -143,8 +132,7 @@ public final class DocumentBuilder {
 	 * @throws IOException 
 	 */
 	public void append(final MethodDoc methodDoc) throws IOException {
-		writer.write("### ");
-		writer.write(methodDoc.name());
+		appendHeader(methodDoc.name(), 4);
 		writer.newLine();
 	}
 

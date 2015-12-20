@@ -9,6 +9,9 @@ import java.util.Set;
 
 import com.sun.javadoc.*;
 
+import fr.faylixe.marklet.builder.ClassPageBuilder;
+import fr.faylixe.marklet.builder.PackagePageBuilder;
+
 /**
  * 
  * @author fv
@@ -16,13 +19,10 @@ import com.sun.javadoc.*;
 public final class Marklet implements IGenerationContext {
 
 	/** **/
-	public static final String FILE_EXTENSION = ".md";
-
-	/** **/
 	private final RootDoc root;
 
 	/** **/
-	private final Set<ClassDoc> classes;
+	private final Set<String> classes;
 
 	/** **/
 	private final String sourcePath;
@@ -41,38 +41,36 @@ public final class Marklet implements IGenerationContext {
 	 */
 	private Marklet(final MarkletOptions options, final RootDoc root) {
 		this.root = root;
-		this.classes = new HashSet<ClassDoc>();
+		this.classes = new HashSet<String>();
 		this.sourcePath = options.getSourcePath();
 		this.documentationPath = options.getDocumentationPath();
 		this.outputDirectory = "javadoc/"; // TODO : Retrives from options.
 	}
 
 	/** {@inheritDoc} **/
+	@Override
 	public String getSourcePath() {
 		return sourcePath;
 	}
 
 	/** {@inheritDoc} **/
+	@Override
 	public String getDocumentationPath() {
-		return documentationPath;
+		return "https://github.com/Faylixe/googlecodejam-client/blob/master/";
 	}
 
 	/** {@inheritDoc} **/
+	@Override
 	public String getOutputDirectory() {
 		return outputDirectory;
 	}
 
 	/** {@inheritDoc} **/
-	public String getClassURL(final String qualifiedName) {
-		final StringBuilder urlBuilder = new StringBuilder();
-		if (classes.contains(qualifiedName)) {
-			urlBuilder.append(getDocumentationPath());
-			urlBuilder.append(qualifiedName.replace('.', '/'));
-			urlBuilder.append(FILE_EXTENSION);
-		}
-		return urlBuilder.toString();
+	@Override
+	public boolean containsClass(final String qualifiedName) {
+		return classes.contains(qualifiedName);
 	}
-	
+
 	/**
 	 * Builds and retrieves the path for the
 	 * directory associated to the package
@@ -105,7 +103,7 @@ public final class Marklet implements IGenerationContext {
 			if (!Files.exists(directoryPath)) {
 				Files.createDirectories(directoryPath);
 			}
-			PackagePageBuilder.build(directoryPath, packageDoc);
+			PackagePageBuilder.build(this, directoryPath, packageDoc);
 			return directoryPath;
 		}
 		return Paths.get(".");
@@ -121,9 +119,9 @@ public final class Marklet implements IGenerationContext {
 			final PackageDoc packageDoc = classDoc.containingPackage();
 			if (!packages.contains(packageDoc)) {
 				packages.add(packageDoc);
-				classes.add(classDoc);
 				generatePackage(packageDoc);
 			}
+			classes.add(classDoc.qualifiedName());
 		}
 	}
 
