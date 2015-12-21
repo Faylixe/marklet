@@ -2,6 +2,7 @@ package fr.faylixe.marklet.builder;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.function.Supplier;
 
 import com.sun.javadoc.ClassDoc;
@@ -28,6 +29,9 @@ public final class PackagePageBuilder {
 	private static final String ENUMERATIONS = "Enumerations";
 
 	/** **/
+	private final IGenerationContext context;
+
+	/** **/
 	private final DocumentBuilder documentBuilder;
 
 	/** **/
@@ -36,10 +40,12 @@ public final class PackagePageBuilder {
 	/**
 	 * Default constructor.
 	 * 
+	 * @param context
 	 * @param documentBuilder
 	 * @param packageDoc
 	 */
-	private PackagePageBuilder(final DocumentBuilder documentBuilder, final PackageDoc packageDoc) {
+	private PackagePageBuilder(final IGenerationContext context, final DocumentBuilder documentBuilder, final PackageDoc packageDoc) {
+		this.context = context;
 		this.packageDoc = packageDoc;
 		this.documentBuilder = documentBuilder;
 	}
@@ -56,6 +62,21 @@ public final class PackagePageBuilder {
 				1);
 		documentBuilder.newLine();
 		documentBuilder.append(packageDoc.commentText());
+		documentBuilder.newLine();
+	}
+
+	/**
+	 * 
+	 * @param classDoc
+	 * @throws IOException
+	 */
+	private void buildClassRow(final ClassDoc classDoc) {
+		try {			
+			documentBuilder.appendTableRow(context.getClassLink(classDoc));
+		}
+		catch (final IOException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	/**
@@ -65,9 +86,14 @@ public final class PackagePageBuilder {
 	 * @throws IOException 
 	 */
 	private void buildIndex(final String label, final Supplier<ClassDoc[]> classSupplier) throws IOException {
-		documentBuilder.appendHeader(label, 2);
-		for (final ClassDoc classDoc : classSupplier.get()) {
-			
+		final ClassDoc [] classDocs = classSupplier.get();
+		if (classDocs.length > 0) {
+			documentBuilder.appendHeader(label, 2);
+			documentBuilder.appendTableHeader("Name");
+			Arrays
+				.stream(classDocs)
+				.forEach(this::buildClassRow);
+			documentBuilder.newLine();
 		}
 	}
 
@@ -91,9 +117,10 @@ public final class PackagePageBuilder {
 	public static void build(final IGenerationContext context, final Path directoryPath, final PackageDoc packageDoc) throws IOException {
 		final Path path = directoryPath.resolve("README.md");
 		final DocumentBuilder documentBuilder = DocumentBuilder.create(context, path);
-		final PackagePageBuilder packageBuilder = new PackagePageBuilder(documentBuilder, packageDoc);
+		final PackagePageBuilder packageBuilder = new PackagePageBuilder(context, documentBuilder, packageDoc);
 		packageBuilder.buildHeader();
 		packageBuilder.buildIndexes();
+		documentBuilder.build();
 	}
 
 }

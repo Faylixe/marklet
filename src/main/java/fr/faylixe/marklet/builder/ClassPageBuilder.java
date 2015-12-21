@@ -12,7 +12,6 @@ import com.sun.javadoc.PackageDoc;
 
 import fr.faylixe.marklet.IGenerationContext;
 import fr.faylixe.marklet.MarkdownUtils;
-import fr.faylixe.marklet.Marklet;
 
 /**
  * 
@@ -136,7 +135,7 @@ public final class ClassPageBuilder {
 		final Path classPath = Paths.get(
 				new StringBuilder()
 					.append(classDoc.simpleTypeName())
-					.append(Marklet.FILE_EXTENSION)
+					.append(IGenerationContext.FILE_EXTENSION)
 					.toString());
 		final DocumentBuilder documentBuilder = DocumentBuilder.create(context, directoryPath.resolve(classPath));
 		final ClassPageBuilder builder = new ClassPageBuilder(context, documentBuilder, classDoc);

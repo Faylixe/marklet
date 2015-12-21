@@ -46,8 +46,7 @@ public final class MethodSignatureBuilder {
 		}
 		else {
 			final ClassDoc classDoc = type.asClassDoc();
-			final String url = context.getClassURL(classDoc.qualifiedName());
-			final String link = MarkdownUtils.buildLink(classDoc.name(), url);
+			final String link = context.getClassLink(classDoc);
 			returnBuilder.append(link);
 		}
 		return returnBuilder.toString();

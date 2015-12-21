@@ -10,14 +10,19 @@ import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.MethodDoc;
 
 import fr.faylixe.marklet.IGenerationContext;
-import fr.faylixe.marklet.MarkdownUtils;
 
 /**
  * 
  * @author fv
  */
 public final class DocumentBuilder {
-	
+
+	/** **/
+	private static final String MARKLET_LINK = "[![Marklet](https://img.shields.io/badge/Generated%20by-Marklet-green.svg)](https://github.com/Faylixe/marklet)";
+
+	/** **/
+	private static final String HR = "---";
+
 	/** **/
 	private static final String TABLE_HEADER = "| --- | --- |";
 
@@ -72,10 +77,8 @@ public final class DocumentBuilder {
 	public void appendHierarchy(final ClassDoc leaf) throws IOException {
 		final StringBuilder hiearchyBuilder = new StringBuilder();
 		ClassDoc current = leaf;
-		while (current != null) {
-			final String url = context.getClassURL(current.qualifiedName());
-			final String link = MarkdownUtils.buildLink(current.name(), url);
-			hiearchyBuilder.insert(0, link);
+		while (current != null) {			
+			hiearchyBuilder.insert(0, context.getClassLink(current));
 			current = current.superclass();
 			if (current != null) {
 				hiearchyBuilder.insert(0, " > ");
@@ -83,6 +86,33 @@ public final class DocumentBuilder {
 		}
 		writer.write(hiearchyBuilder.toString());
 		writer.newLine();
+		writer.newLine();
+	}
+	
+	/**
+	 * 
+	 * @param headers
+	 * @throws IOException
+	 */
+	public void appendTableHeader(final String  ... headers) throws IOException {
+		appendTableRow(headers);
+		writer.write("|");
+		for (int i = 0; i < headers.length; i++) {
+			writer.write(" --- |");
+		}
+		writer.newLine();
+	}
+
+	/**
+	 * 
+	 * @param cells
+	 */
+	public void appendTableRow(final String ... cells) throws IOException {
+		writer.write("| ");
+		for (final String cell : cells) {
+			writer.write(cell);
+			writer.write(" |");
+		}
 		writer.newLine();
 	}
 	
@@ -142,6 +172,9 @@ public final class DocumentBuilder {
 	 * @throws IOException 
 	 */
 	public void build() throws IOException {
+		writer.write(HR);
+		writer.newLine();
+		writer.write(MARKLET_LINK);
 		writer.close();
 	}
 	

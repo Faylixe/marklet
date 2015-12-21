@@ -1,5 +1,7 @@
 package fr.faylixe.marklet;
 
+import com.sun.javadoc.ClassDoc;
+
 /**
  * 
  * @author fv
@@ -39,16 +41,19 @@ public interface IGenerationContext {
 	 * @param qualifiedName
 	 * @return
 	 */
-	default String getClassURL(final String qualifiedName) {
-		final StringBuilder urlBuilder = new StringBuilder();
+	default String getClassLink(final ClassDoc classDoc) {
+		final String qualifiedName = classDoc.qualifiedName();
 		if (containsClass(qualifiedName)) {
+			final StringBuilder urlBuilder = new StringBuilder();
 			urlBuilder
 				.append(getDocumentationPath())
 				.append(getOutputDirectory())
 				.append(qualifiedName.replace('.', '/'))
 				.append(FILE_EXTENSION);
+			return MarkdownUtils.buildLink(classDoc.simpleTypeName(), urlBuilder.toString());
 		}
-		return urlBuilder.toString();
+		// TODO : Process offline link.
+		return "";
 	}
 
 	/**

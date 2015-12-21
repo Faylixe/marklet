@@ -114,6 +114,16 @@ public final class Marklet implements IGenerationContext {
 	 * @throws IOException
 	 */
 	private void buildIndex() throws IOException {
+		for (final ClassDoc classDoc : root.classes()) {
+			classes.add(classDoc.qualifiedName());
+		}
+	}
+	
+	/**
+	 * 
+	 * @throws IOException
+	 */
+	private void buildPackages() throws IOException {
 		final Set<PackageDoc> packages = new HashSet<PackageDoc>();
 		for (final ClassDoc classDoc : root.classes()) {
 			final PackageDoc packageDoc = classDoc.containingPackage();
@@ -121,7 +131,6 @@ public final class Marklet implements IGenerationContext {
 				packages.add(packageDoc);
 				generatePackage(packageDoc);
 			}
-			classes.add(classDoc.qualifiedName());
 		}
 	}
 
@@ -152,6 +161,7 @@ public final class Marklet implements IGenerationContext {
 				Files.createDirectories(outputDirectory);
 			}
 			buildIndex();
+			buildPackages();
 			buildClasses();
 		}
 		catch (final IOException e) {
