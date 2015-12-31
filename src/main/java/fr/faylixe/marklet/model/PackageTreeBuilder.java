@@ -84,12 +84,10 @@ public final class PackageTreeBuilder {
 		final int n = index.size();
 		final int [][] graph = new int[n][n];
 		// TODO : Think about parallel processing.
-		for (final String source : index.keySet()) {
-			for (final String target : index.keySet()) {
-				final int i = index.get(source);
-				final int j = index.get(target);
+		for (int i = 0; i < index.size(); i++) {
+			for (int j = 0; j < index.size(); j++) {
 				if (reference == null || (i != j && reference[i][j] == 0)) {
-					graph[i][j] = computeDistance(source, target);
+					graph[i][j] = computeDistance(reverseIndex[i], reverseIndex[j]);
 				}
 				else {
 					graph[i][j] = reference[i][j];
@@ -107,8 +105,7 @@ public final class PackageTreeBuilder {
 	 * @return ``true`` if the given ``node`` is connected, ``false`` otherwise.
 	 */
 	private boolean isConnected(final int node) {
-		for (final String target : index.keySet()) {
-			final int i = index.get(target);
+		for (int i = 0; i < index.size(); i++) {
 			if (node != i) {
 				final int distance = graph[node][i];
 				if (distance != 0 && distance != Integer.MAX_VALUE) {
@@ -125,18 +122,20 @@ public final class PackageTreeBuilder {
 	 * common prefix with the given ``node``.
 	 * 
 	 * @param node Node to connect to the graph.
-	 * @param value Value of the node.
 	 */
-	private void connect(final int node, final String value) {
+	private void connect(final int node) {
 		String longestPrefix = "";
 		for (final String candidate : index.keySet()) {
-			final String prefix = StringUtils.getCommonPrefix(value, candidate);
+			final String prefix = StringUtils.getCommonPrefix(reverseIndex[node], candidate);
 			if (prefix.length() > longestPrefix.length()) {
 				longestPrefix = prefix;
 			}
 		}
 		if (!longestPrefix.isEmpty()) {
+			// TODO : Resize once, fill all.
+			reverseIndex = Arrays.copyOf(reverseIndex, reverseIndex.length + 1);
 			index.put(longestPrefix, counter.getAndIncrement());
+			reverseIndex[reverseIndex.length - 1] = longestPrefix;
 		}
 	}
 
@@ -148,10 +147,9 @@ public final class PackageTreeBuilder {
 	 * prefix.
 	 */
 	private void buildConnectedGraph() {
-		for (final String node : index.keySet()) {
-			final int i = index.get(node);
+		for (int i = 0; i < index.size(); i++) {
 			if (!isConnected(i)) {
-				connect(i, node);
+				connect(i);
 			}
 		}
 		buildGraph(graph);
@@ -192,8 +190,7 @@ public final class PackageTreeBuilder {
 	 */
 	private int getClosestDistance(final int node) {
 		int best = Integer.MAX_VALUE;
-		for (final String candidate : index.keySet()) {
-			final int m = index.get(candidate);
+		for (int m = 0; m < index.size(); m++) {
 			final int distance = getAlphaDistance(node, m);
 			if (distance > 0 && distance < best) {
 				best = distance;
@@ -212,8 +209,7 @@ public final class PackageTreeBuilder {
 	private Set<Integer> getClosestNodes(final int node, final Set<Integer> visited) {
 		final Set<Integer> closestNodes = new HashSet<Integer>();
 		final int best = getClosestDistance(node);
-		for (final String candidate : index.keySet()) {
-			final int m = index.get(candidate);
+		for (int m = 0; m < index.size(); m++) {
 			if (!visited.contains(m) && graph[node][m] == best) {
 				closestNodes.add(m);
 			}
@@ -229,6 +225,7 @@ public final class PackageTreeBuilder {
 	 */
 	private void buildAlphaRootedTree() {
 		index.put("", graph.length);
+		// TODO : Add to reverse index.
 		final int n = graph.length + 1;
 		final int [][] tree = new int[n][n];
 		final Queue<Integer> queue = new LinkedList<Integer>();

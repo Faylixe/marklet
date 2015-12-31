@@ -9,6 +9,9 @@ import java.util.Map;
  */
 public final class PackageTree {
 
+	/** **/
+	private static final IllegalArgumentException UNKNOWN_PACKAGE = new IllegalArgumentException("");
+
 	/** Index of the root of the tree, also named alpha node here. **/
 	private final int alpha;
 
@@ -30,6 +33,9 @@ public final class PackageTree {
 	/** Package index that maps a given package name to a integer index. **/
 	private final Map<String, Integer> index;
 
+	/** **/
+	private final int size;
+
 	/**
 	 * Default constructor.
 	 * 
@@ -39,11 +45,26 @@ public final class PackageTree {
 	 */
 	protected PackageTree(final int [][] tree, final Map<String, Integer> index, final String [] reverseIndex) {
 		this.tree = tree;
+		this.size = tree.length;
 		this.index = index;
 		this.alpha = tree.length - 1;
 		this.reverseIndex = reverseIndex;
 	}
-	
+
+	/**
+	 * 
+	 * @param node
+	 * @return
+	 */
+	private int getParent(final int node) {
+		for (int m = 0; m < size; m++) {
+			if (tree[node][m] < 0) {
+				return m;
+			}
+		}
+		return -1;
+	}
+
 	/**
 	 * 
 	 * @param source
@@ -52,9 +73,28 @@ public final class PackageTree {
 	 */
 	public String getShortestPath(final String source, final String target) {
 		if (!index.containsKey(source) || !index.containsKey(target)) {
-			throw new IllegalArgumentException(); // TODO Add error message.
+			throw UNKNOWN_PACKAGE;
 		}
-		return null;
+		final StringBuilder pathBuilder = new StringBuilder();
+		int current = index.get(source);
+		while (!target.equals(reverseIndex[current])) {
+			// Case 1 : Valid branch. Go down.
+			if (target.startsWith(source)) {
+				for (int m = 0; m < size; m++) {
+					if (target.startsWith(reverseIndex[m])) {
+						// TODO : Append terminal package if required.
+						current = m;
+						break;
+					}
+				}
+			}
+			// Case 2 : Go up to find the valid branch.
+			else {
+				pathBuilder.append("../");
+				current = getParent(current);
+			}
+		}
+		return pathBuilder.toString();
 	}
 	
 	/**
