@@ -116,7 +116,7 @@ public final class PackagePageBuilder {
 	 */
 	public static void build(final IGenerationContext context, final Path directoryPath, final PackageDoc packageDoc) throws IOException {
 		final Path path = directoryPath.resolve("README.md");
-		final DocumentBuilder documentBuilder = DocumentBuilder.create(context, path);
+		final DocumentBuilder documentBuilder = DocumentBuilder.create(context, packageDoc, path);
 		final PackagePageBuilder packageBuilder = new PackagePageBuilder(context, documentBuilder, packageDoc);
 		packageBuilder.buildHeader();
 		packageBuilder.buildIndexes();

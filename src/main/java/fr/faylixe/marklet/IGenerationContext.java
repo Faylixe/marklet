@@ -69,6 +69,7 @@ public interface IGenerationContext {
 		}
 		final String forward = target.substring(start);
 		builder.append(forward.replace('.', '/'));
+		builder.append('/');
 		return builder.toString();
 	}
 

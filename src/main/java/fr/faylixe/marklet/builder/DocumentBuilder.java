@@ -8,6 +8,12 @@ import java.nio.file.Path;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.MethodDoc;
+import com.sun.javadoc.PackageDoc;
+import com.sun.javadoc.ParamTag;
+import com.sun.javadoc.Parameter;
+import com.sun.javadoc.Tag;
+import com.sun.javadoc.ThrowsTag;
+import com.sun.javadoc.Type;
 
 import fr.faylixe.marklet.IGenerationContext;
 
@@ -24,10 +30,13 @@ public final class DocumentBuilder {
 	private static final String HR = "---";
 
 	/** **/
-	private static final String TABLE_HEADER = "| --- | --- |";
+	private static final String TABLE_HEADER = "| --- | --- | --- |";
 
 	/** **/
 	private static final String METHOD_SUMMARY_HEADER = "| Type | Method |";
+	
+	/** **/
+	private static final String FIELD_SUMMARY_HEADER = "| Type | Field | Description |";
 
 	/** **/
 	private final IGenerationContext context;
@@ -35,12 +44,18 @@ public final class DocumentBuilder {
 	/** **/
 	private final BufferedWriter writer;
 
+	/** **/
+	private final PackageDoc source;
+
 	/**
 	 * 
 	 * @param context
+	 * @param source
+	 * @param writer
 	 */
-	public DocumentBuilder(final IGenerationContext context, final BufferedWriter writer) {
+	public DocumentBuilder(final IGenerationContext context, final PackageDoc source, final BufferedWriter writer) {
 		this.context = context;
+		this.source = source;
 		this.writer = writer;
 	}
 
@@ -84,6 +99,7 @@ public final class DocumentBuilder {
 				hiearchyBuilder.insert(0, " > ");
 			}
 		}
+		writer.write("> ");
 		writer.write(hiearchyBuilder.toString());
 		writer.newLine();
 		writer.newLine();
@@ -96,7 +112,7 @@ public final class DocumentBuilder {
 	 */
 	public void appendTableHeader(final String  ... headers) throws IOException {
 		appendTableRow(headers);
-		writer.write("|");
+		writer.write("|"); 
 		for (int i = 0; i < headers.length; i++) {
 			writer.write(" --- |");
 		}
@@ -141,6 +157,33 @@ public final class DocumentBuilder {
 		writer.write(" |");
 		writer.newLine();
 	}
+	
+	/**
+	 * 
+	 * @param field
+	 * @throws IOException
+	 */
+	public void appendField(final FieldDoc field) throws IOException {
+		writer.write("| ");
+		writer.write(""); // TODO : Write link type.
+		writer.write(" | ");
+		writer.write(field.name());
+		writer.write(" |");
+		writer.newLine();
+
+	}
+
+	/**
+	 * 
+	 * @throws IOException
+	 */
+	public void initializeFieldHeader() throws IOException {
+		writer.newLine();
+		writer.write(FIELD_SUMMARY_HEADER);
+		writer.newLine();
+		writer.write(TABLE_HEADER);
+		writer.newLine();
+	}
 
 	/**
 	 * 
@@ -161,9 +204,70 @@ public final class DocumentBuilder {
 	 * @param methodDoc
 	 * @throws IOException 
 	 */
-	public void append(final MethodDoc methodDoc) throws IOException {
-		appendHeader(methodDoc.name(), 4);
+	public void appendMethod(final MethodDoc methodDoc) throws IOException {
+		appendHeader(methodDoc.name(), 3);
 		writer.newLine();
+		writer.write(methodDoc.commentText());
+		appendParameters(methodDoc.paramTags());
+		appendReturn(methodDoc.tags("return"));
+		appendsException(methodDoc.throwsTags());
+		writer.newLine();
+		writer.write("--");
+		writer.newLine();
+		
+	}
+
+	/**
+	 * 
+	 * @param parameters
+	 * @throws IOException
+	 */
+	private void appendParameters(final ParamTag[] parameters) throws IOException {
+		if (parameters.length > 0) {
+			writer.newLine();
+			appendHeader("Parameters", 5);
+			writer.newLine();
+			for (final ParamTag parameter : parameters) {
+				writer.write("* ");
+				writer.write(parameter.parameterName());
+				writer.write(" ");
+				writer.write(parameter.parameterComment());
+				writer.newLine();
+			}
+		}
+	}
+	
+	/**
+	 * 
+	 * @param type
+	 */
+	private void appendReturn(final Tag[] tag) throws IOException {
+		if (tag.length > 0) {
+			writer.newLine();
+			appendHeader("Returns", 5);
+			writer.newLine();
+			writer.write("* ");
+			writer.write(tag[0].text());
+			writer.newLine();
+		}
+	}
+
+	/**
+	 * 
+	 * @throws IOException
+	 */
+	private void appendsException(final ThrowsTag[] exceptions) throws IOException {
+		if (exceptions.length > 0) {
+			writer.newLine();
+			appendHeader("Throws", 5);
+			for (final ThrowsTag exception : exceptions) {
+				writer.write("* ");
+				writer.write(context.getClassLink(source, exception.exception())); // TODO : Link to exception class.
+				writer.write(" ");
+				writer.write(exception.exceptionComment());
+				writer.newLine();
+			}
+		}
 	}
 
 	/**
@@ -181,14 +285,15 @@ public final class DocumentBuilder {
 	/**
 	 * 
 	 * @param context
+	 * @param source
 	 * @param path
 	 * @return
 	 * @throws IOException
 	 */
-	public static DocumentBuilder create(final IGenerationContext context, final Path path) throws IOException {
+	public static DocumentBuilder create(final IGenerationContext context, final PackageDoc source, final Path path) throws IOException {
 		final FileWriter fileWriter = new FileWriter(path.toFile());
 		final BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-		return new DocumentBuilder(context, bufferedWriter);
+		return new DocumentBuilder(context, source, bufferedWriter);
 	}
 
 }

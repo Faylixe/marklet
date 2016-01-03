@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.sun.javadoc.ClassDoc;
+import com.sun.javadoc.Doc;
+import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.MethodDoc;
 import com.sun.javadoc.PackageDoc;
 
@@ -39,6 +42,22 @@ public final class ClassPageBuilder {
 		this.classDoc = classDoc;
 		this.documentBuilder = documentBuilder;
 	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	private boolean hasMethod() {
+		return classDoc.methods().length > 0;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	private boolean hasField() {
+		return classDoc.fields().length > 0;
+	}
 
 	/**
 	 * Builds and writes the documentation header.
@@ -53,7 +72,7 @@ public final class ClassPageBuilder {
 		final String packageName = packageDoc.name();
 		documentBuilder.append(
 				"Package "
-				+ MarkdownUtils.buildLink(packageName, "../")
+				+ MarkdownUtils.buildLink(packageName, "README.md")
 				+ "<br>"
 		);
 		documentBuilder.appendHierarchy(classDoc);
@@ -62,16 +81,17 @@ public final class ClassPageBuilder {
 
 	/**
 	 * 
+	 * @param supplier
 	 * @return
 	 */
-	private Stream<MethodDoc> getMethods() {
+	private <T extends Doc> Stream<T> getOrderedElements(final Supplier<T[]> supplier) {
 		return Arrays
-				.stream(classDoc.methods())
+				.stream(supplier.get())
 				.sorted((a, b) -> {
 					return a.name().compareTo(b.name());
 				});
 	}
-	
+
 	/**
 	 * Builds class summary. Consists in an overview of
 	 * available constructor, method, and field, in a
@@ -80,17 +100,21 @@ public final class ClassPageBuilder {
 	 * @throws IOException If any error occurs while writing summary.
 	 */
 	private void buildSummary() throws IOException {
-		documentBuilder.newLine();
-		documentBuilder.appendHeader("Summary", 3);
-		documentBuilder.initializeMethodHeader();
-		getMethods().forEach(method -> {
-			try {
-				documentBuilder.appendMethodHeader(method);				
+		if (hasField() || hasMethod()) {
+			documentBuilder.newLine();
+			documentBuilder.appendHeader("Summary", 2);
+			if (hasMethod()) {
+				documentBuilder.initializeMethodHeader();
+				getOrderedElements(classDoc::methods).forEach(method -> {
+					try {
+						documentBuilder.appendMethodHeader(method);				
+					}
+					catch (final IOException e) {
+						// TODO : Throw runtime here.
+					}
+				});
 			}
-			catch (final IOException e) {
-				// TODO : Throw runtime here.
-			}
-		});
+		}
 	}
 	
 	/**
@@ -99,8 +123,28 @@ public final class ClassPageBuilder {
 	 * @throws IOException If any error occurs while writing field documentation.
 	 */
 	private void buildFields() throws IOException {
-		documentBuilder.newLine();
-		documentBuilder.appendHeader("Fields", 3);
+		if (hasField()) {
+			documentBuilder.newLine();
+			documentBuilder.appendHeader("Fields", 2);
+			documentBuilder.initializeFieldHeader();
+			buildFields(getOrderedElements(classDoc::fields).filter(field -> !field.isStatic()));
+			buildFields(getOrderedElements(classDoc::fields).filter(FieldDoc::isStatic));
+		}
+	}
+	
+	/**
+	 * 
+	 * @param stream
+	 */
+	private void buildFields(final Stream<FieldDoc> stream) {
+		stream.forEach(field -> {
+			try {
+				documentBuilder.appendField(field);
+			}
+			catch (final IOException e) {
+				// TODO : Throw runtine here.
+			}
+		});
 	}
 	
 	/**
@@ -109,16 +153,18 @@ public final class ClassPageBuilder {
 	 * @throws IOException If any error occurs while writing method documentation.
 	 */
 	private void buildMethods() throws IOException {
-		documentBuilder.newLine();
-		documentBuilder.appendHeader("Methods", 3);
-		getMethods().forEach(method -> {
-			try {
-				documentBuilder.append(method);
-			}
-			catch (final IOException e) {
-				// TODO : Throw runtine here.
-			}
-		});
+		if (hasMethod()) {
+			documentBuilder.newLine();
+			documentBuilder.appendHeader("Methods", 2);
+			getOrderedElements(classDoc::methods).forEach(method -> {
+				try {
+					documentBuilder.appendMethod(method);
+				}
+				catch (final IOException e) {
+					// TODO : Throw runtine here.
+				}
+			});
+		}
 	}
 
 	/**
@@ -137,7 +183,7 @@ public final class ClassPageBuilder {
 					.append(classDoc.simpleTypeName())
 					.append(IGenerationContext.FILE_EXTENSION)
 					.toString());
-		final DocumentBuilder documentBuilder = DocumentBuilder.create(context, directoryPath.resolve(classPath));
+		final DocumentBuilder documentBuilder = DocumentBuilder.create(context, classDoc.containingPackage(), directoryPath.resolve(classPath));
 		final ClassPageBuilder builder = new ClassPageBuilder(context, documentBuilder, classDoc);
 		builder.buildHeader();
 		builder.buildSummary();
