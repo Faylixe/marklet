@@ -72,7 +72,7 @@ public final class PackagePageBuilder {
 	 */
 	private void buildClassRow(final ClassDoc classDoc) {
 		try {			
-			documentBuilder.appendTableRow(context.getClassLink(classDoc));
+			documentBuilder.appendTableRow(context.getClassLink(packageDoc, classDoc));
 		}
 		catch (final IOException e) {
 			throw new IllegalStateException(e);

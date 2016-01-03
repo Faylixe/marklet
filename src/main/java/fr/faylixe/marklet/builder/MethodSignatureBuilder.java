@@ -46,7 +46,7 @@ public final class MethodSignatureBuilder {
 		}
 		else {
 			final ClassDoc classDoc = type.asClassDoc();
-			final String link = context.getClassLink(classDoc);
+			final String link = context.getClassLink(method.containingPackage(), classDoc);
 			returnBuilder.append(link);
 		}
 		return returnBuilder.toString();

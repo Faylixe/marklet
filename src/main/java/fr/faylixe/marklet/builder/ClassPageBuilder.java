@@ -53,7 +53,7 @@ public final class ClassPageBuilder {
 		final String packageName = packageDoc.name();
 		documentBuilder.append(
 				"Package "
-				+ MarkdownUtils.buildLink(packageName, context.getPackageURL(packageName))
+				+ MarkdownUtils.buildLink(packageName, "../")
 				+ "<br>"
 		);
 		documentBuilder.appendHierarchy(classDoc);

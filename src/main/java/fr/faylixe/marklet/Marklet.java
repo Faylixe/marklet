@@ -22,15 +22,6 @@ public final class Marklet implements IGenerationContext {
 	private final RootDoc root;
 
 	/** **/
-	private final Set<String> classes;
-
-	/** **/
-	private final String sourcePath;
-
-	/** **/
-	private final String documentationPath;
-
-	/** **/
 	private final String outputDirectory;
 
 	/**
@@ -41,34 +32,22 @@ public final class Marklet implements IGenerationContext {
 	 */
 	private Marklet(final MarkletOptions options, final RootDoc root) {
 		this.root = root;
-		this.classes = new HashSet<String>();
-		this.sourcePath = options.getSourcePath();
-		this.documentationPath = options.getDocumentationPath();
 		this.outputDirectory = "javadoc/"; // TODO : Retrives from options.
 	}
 
 	/** {@inheritDoc} **/
 	@Override
-	public String getSourcePath() {
-		return sourcePath;
-	}
-
-	/** {@inheritDoc} **/
-	@Override
-	public String getDocumentationPath() {
-		return "https://github.com/Faylixe/googlecodejam-client/blob/master/";
-	}
-
-	/** {@inheritDoc} **/
-	@Override
-	public String getOutputDirectory() {
-		return outputDirectory;
-	}
-
-	/** {@inheritDoc} **/
-	@Override
 	public boolean containsClass(final String qualifiedName) {
-		return classes.contains(qualifiedName);
+		return root.classNamed(qualifiedName) != null;
+	}
+	
+	/**
+	 * 
+	 * @param qualifiedName
+	 * @return
+	 */
+	public boolean containsPackage(final String qualifiedName) {
+		return root.packageNamed(qualifiedName) != null;
 	}
 
 	/**
@@ -113,16 +92,6 @@ public final class Marklet implements IGenerationContext {
 	 * 
 	 * @throws IOException
 	 */
-	private void buildIndex() throws IOException {
-		for (final ClassDoc classDoc : root.classes()) {
-			classes.add(classDoc.qualifiedName());
-		}
-	}
-	
-	/**
-	 * 
-	 * @throws IOException
-	 */
 	private void buildPackages() throws IOException {
 		final Set<PackageDoc> packages = new HashSet<PackageDoc>();
 		for (final ClassDoc classDoc : root.classes()) {
@@ -156,11 +125,10 @@ public final class Marklet implements IGenerationContext {
 	 */
 	private boolean start() {
 		try {
-			final Path outputDirectory = Paths.get(getOutputDirectory());
+			final Path outputDirectory = Paths.get("");//getOutputDirectory());
 			if (!Files.exists(outputDirectory)) {
 				Files.createDirectories(outputDirectory);
 			}
-			buildIndex();
 			buildPackages();
 			buildClasses();
 		}

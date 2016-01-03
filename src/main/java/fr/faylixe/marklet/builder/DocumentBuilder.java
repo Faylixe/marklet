@@ -78,7 +78,7 @@ public final class DocumentBuilder {
 		final StringBuilder hiearchyBuilder = new StringBuilder();
 		ClassDoc current = leaf;
 		while (current != null) {			
-			hiearchyBuilder.insert(0, context.getClassLink(current));
+			hiearchyBuilder.insert(0, context.getClassLink(leaf.containingPackage(), current));
 			current = current.superclass();
 			if (current != null) {
 				hiearchyBuilder.insert(0, " > ");
