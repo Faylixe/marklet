@@ -62,7 +62,8 @@ public final class PackagePageBuilder {
 					.toString(),
 				1);
 		documentBuilder.newLine();
-		documentBuilder.appendText(packageDoc.commentText());
+		final String description = context.getDescription(packageDoc);
+		documentBuilder.appendText(description);
 		documentBuilder.newLine();
 	}
 

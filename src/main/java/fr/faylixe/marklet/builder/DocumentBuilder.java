@@ -5,15 +5,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.MethodDoc;
 import com.sun.javadoc.PackageDoc;
 import com.sun.javadoc.ParamTag;
-import com.sun.javadoc.Parameter;
 import com.sun.javadoc.Tag;
 import com.sun.javadoc.ThrowsTag;
-import com.sun.javadoc.Type;
 
 import fr.faylixe.marklet.IGenerationContext;
 import fr.faylixe.marklet.MarkdownUtils;
@@ -30,15 +27,6 @@ public final class DocumentBuilder {
 
 	/** **/
 	private static final String HR = "---";
-
-	/** **/
-	private static final String TABLE_HEADER = "--- | --- | --- ";
-
-	/** **/
-	private static final String METHOD_SUMMARY_HEADER = "| Type | Method |";
-	
-	/** **/
-	private static final String FIELD_SUMMARY_HEADER = "| Type | Field | Description |";
 
 	/** **/
 	private final IGenerationContext context;
@@ -62,6 +50,18 @@ public final class DocumentBuilder {
 	}
 
 	/**
+	 * Appends the given ``text`` to
+	 * the current document.
+	 * 
+	 * @param text Text to append.
+	 * @throws IOException If any error occurs while writing text.
+	 */
+	public void appendText(final String text) throws IOException {
+		writer.write(text);
+		writer.newLine();
+	}
+
+	/**
 	 * Appends a header to the current document,
 	 * with the given ``label`` at the given
 	 * ``level``.
@@ -80,46 +80,18 @@ public final class DocumentBuilder {
 	}
 
 	/**
+	 * Appends the given ``headers`` as a table header row.
 	 * 
-	 * @param text
-	 * @throws IOException 
-	 */
-	public void appendText(final String text) throws IOException {
-		writer.write(text);
-		writer.newLine();
-	}
-
-	/**
-	 * 
-	 * @param leaf
-	 * @throws IOException 
-	 */
-	public void appendHierarchy(final ClassDoc leaf) throws IOException {
-		final StringBuilder hiearchyBuilder = new StringBuilder();
-		ClassDoc current = leaf;
-		while (current != null) {			
-			hiearchyBuilder.insert(0, context.getClassLink(leaf.containingPackage(), current));
-			current = current.superclass();
-			if (current != null) {
-				hiearchyBuilder.insert(0, " > ");
-			}
-		}
-		writer.write("> ");
-		writer.write(hiearchyBuilder.toString());
-		writer.newLine();
-		writer.newLine();
-	}
-	
-	/**
-	 * 
-	 * @param headers
-	 * @throws IOException
+	 * @param headers Headers to write.
+	 * @throws IOException If any error occurs while writing headers.
 	 */
 	public void appendTableHeader(final String  ... headers) throws IOException {
 		appendTableRow(headers);
-		writer.write("|"); 
 		for (int i = 0; i < headers.length; i++) {
-			writer.write(" --- |");
+			writer.write(" --- "); // TODO : Export sequence to markdown ?
+			if (i < headers.length - 1) {
+				writer.write('|');
+			}
 		}
 		writer.newLine();
 	}
@@ -134,18 +106,6 @@ public final class DocumentBuilder {
 			writer.write(cell);
 			writer.write(" |");
 		}
-		writer.newLine();
-	}
-	
-	/**
-	 * @throws IOException 
-	 * 
-	 */
-	public void initializeMethodHeader() throws IOException {
-		writer.newLine();
-		writer.write(METHOD_SUMMARY_HEADER);
-		writer.newLine();
-		writer.write(TABLE_HEADER);
 		writer.newLine();
 	}
 
@@ -181,18 +141,6 @@ public final class DocumentBuilder {
 
 	/**
 	 * 
-	 * @throws IOException
-	 */
-	public void initializeFieldHeader() throws IOException {
-		writer.newLine();
-		writer.write(FIELD_SUMMARY_HEADER);
-		writer.newLine();
-		writer.write(TABLE_HEADER);
-		writer.newLine();
-	}
-
-	/**
-	 * 
 	 */
 	public void newLine() throws IOException {
 		writer.newLine();
@@ -213,7 +161,8 @@ public final class DocumentBuilder {
 	public void appendMethod(final MethodDoc methodDoc) throws IOException {
 		appendHeader(methodDoc.name(), 3);
 		writer.newLine();
-		writer.write(methodDoc.commentText());
+		final String description = context.getDescription(methodDoc);
+		writer.write(description);
 		appendParameters(methodDoc.paramTags());
 		appendReturn(methodDoc.tags("return"));
 		appendsException(methodDoc.throwsTags());

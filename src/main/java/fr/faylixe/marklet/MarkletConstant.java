@@ -39,6 +39,15 @@ public final class MarkletConstant {
 	/** Label for parameters. **/
 	public static final String PARAMETERS = "Parameters";
 
+	/** **/
+	public static final String [] METHODS_SUMMARY_HEADERS = {"Type", "Method"};
+	
+	/** **/
+	public static final String [] CONSTRUCTOR_SUMMARY_HEADERS = {"Constructor"};
+
+	/** **/
+	public static final String [] FIELDS_SUMMARY_HEADERS = {"Type", "Name", "Description"};
+
 	/**
 	 * Private constructor for avoiding instantiation.
 	 */

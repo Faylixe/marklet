@@ -9,7 +9,6 @@ import java.util.stream.Stream;
 
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.Doc;
-import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.PackageDoc;
 
 import fr.faylixe.marklet.IGenerationContext;
@@ -22,7 +21,7 @@ import fr.faylixe.marklet.MarkletConstant;
  */
 public final class ClassPageBuilder {
 
-	/** */
+	/** Generation context used. **/
 	private final IGenerationContext context;
 
 	/** Document builder instance for filling class page content.  **/
@@ -34,7 +33,7 @@ public final class ClassPageBuilder {
 	/**
 	 * Default constructor. 
 	 * 
-	 * @param context
+	 * @param context Generation context used.
 	 * @param documentBuilder Document builder instance for filling class page content.
 	 * @param classDoc Target class that page is built from.
 	 */
@@ -61,13 +60,39 @@ public final class ClassPageBuilder {
 	private boolean hasField() {
 		return classDoc.fields().length > 0;
 	}
+	
+	/**
+	 * Indicates if the target class exposes any constructor.
+	 * 
+	 * @return ``true`` if the target class exposes at least one constructor, ``false`` otherwise.
+	 */
+	private boolean hasConstructor() {
+		return classDoc.constructors().length > 0;
+	}
+
+	/**
+	 * Builds and write a class hierarchy from the
+	 * current class. Such hierarchy consists in the
+	 * class inheritance path.
+	 */
+	private String buildHierachy() {
+		final StringBuilder hiearchyBuilder = new StringBuilder();
+		ClassDoc current = classDoc;
+		while (current != null) {			
+			hiearchyBuilder.insert(0, context.getClassLink(classDoc.containingPackage(), current));
+			current = current.superclass();
+			if (current != null) {
+				hiearchyBuilder.insert(0, " > "); // TODO : Constant
+			}
+		}
+		hiearchyBuilder.insert(0, "> "); // TODO : Constant
+		return hiearchyBuilder.toString();
+	}
 
 	/**
 	 * Builds and writes the documentation header.
 	 * Consists in the class name with a H1 level,
 	 * the class hierarchy, and the comment text.
-	 * 
-	 * TODO : Processes link tags.
 	 * 
 	 * @throws IOException If any error occurs while writing header.
 	 */
@@ -75,9 +100,15 @@ public final class ClassPageBuilder {
 		documentBuilder.appendHeader(classDoc.name(), 1);
 		final PackageDoc packageDoc = classDoc.containingPackage();
 		final String packageName = packageDoc.name();
-		documentBuilder.appendText(MarkletConstant.PACKAGE + MarkdownUtils.buildLink(packageName, "README.md") + "<br>");
-		documentBuilder.appendHierarchy(classDoc);
-		documentBuilder.appendText(classDoc.commentText());		
+		final String packageHeader = new StringBuilder(MarkletConstant.PACKAGE)
+			.append(MarkdownUtils.buildLink(packageName, MarkletConstant.README))
+			.append("<br>") // TODO : Constant
+			.toString();
+		documentBuilder.appendText(packageHeader);
+		documentBuilder.appendText(buildHierachy());
+		documentBuilder.newLine();
+		final String description = context.getDescription(classDoc);
+		documentBuilder.appendText(description);		
 	}
 
 	/**
@@ -96,6 +127,50 @@ public final class ClassPageBuilder {
 	}
 
 	/**
+	 * Builds the summary for all exposed methods if any.
+	 * 
+	 * @throws IOException If any error occurs while creating method summary.
+	 */
+	private void buildMethodsSummary() throws IOException {
+		if (hasMethod()) {
+			documentBuilder.appendTableHeader(MarkletConstant.METHODS_SUMMARY_HEADERS);
+			getOrderedElements(classDoc::methods).forEach(method -> {
+				try {
+					documentBuilder.appendMethodHeader(method);				
+				}
+				catch (final IOException e) {
+					// TODO : Throw runtime here.
+				}
+			});
+		}
+	}
+	
+	/**
+	 * Builds the summary for all exposed fields if any.
+	 * 
+	 * @throws IOException If any error occurs while creating field summary.
+	 */
+	private void buildFieldSummary() throws IOException {
+		if (hasField()) {
+			documentBuilder.appendTableHeader(MarkletConstant.FIELDS_SUMMARY_HEADERS);
+		}
+	}
+
+	/**
+	 * Builds the summary for all exposed constructors if any.
+	 * 
+	 * @throws IOException If any error occurs while creating constructor summary.
+	 */
+	private void buildConstructorSummary() throws IOException {
+		if (hasConstructor()) {
+			documentBuilder.appendTableHeader(MarkletConstant.CONSTRUCTOR_SUMMARY_HEADERS);
+			getOrderedElements(classDoc::constructors).forEach(constructor -> {
+				
+			});
+		}
+	}
+
+	/**
 	 * Builds class summary. Consists in an overview of
 	 * available constructor, method, and field, in a
 	 * table form.
@@ -103,23 +178,15 @@ public final class ClassPageBuilder {
 	 * @throws IOException If any error occurs while writing summary.
 	 */
 	private void buildSummary() throws IOException {
-		if (hasField() || hasMethod()) {
+		if (hasField() || hasMethod() || hasConstructor()) {
 			documentBuilder.newLine();
 			documentBuilder.appendHeader("Summary", 2);
-			if (hasMethod()) {
-				documentBuilder.initializeMethodHeader();
-				getOrderedElements(classDoc::methods).forEach(method -> {
-					try {
-						documentBuilder.appendMethodHeader(method);				
-					}
-					catch (final IOException e) {
-						// TODO : Throw runtime here.
-					}
-				});
-			}
+			buildConstructorSummary();
+			buildMethodsSummary();
+			buildFieldSummary();
 		}
 	}
-	
+
 	/**
 	 * Builds fields documentation.
 	 * 
@@ -129,25 +196,10 @@ public final class ClassPageBuilder {
 		if (hasField()) {
 			documentBuilder.newLine();
 			documentBuilder.appendHeader(MarkletConstant.FIELDS, 2);
-			documentBuilder.initializeFieldHeader();
-			buildFields(getOrderedElements(classDoc::fields).filter(field -> !field.isStatic()));
-			buildFields(getOrderedElements(classDoc::fields).filter(FieldDoc::isStatic));
+//			documentBuilder.appendTableHeader(MarkletConstant.FIELDS_SUMMARY_HEADERS);
+//			buildFields(getOrderedElements(classDoc::fields).filter(field -> !field.isStatic()));
+//			buildFields(getOrderedElements(classDoc::fields).filter(FieldDoc::isStatic));
 		}
-	}
-	
-	/**
-	 * 
-	 * @param stream
-	 */
-	private void buildFields(final Stream<FieldDoc> stream) {
-		stream.forEach(field -> {
-			try {
-				documentBuilder.appendField(field);
-			}
-			catch (final IOException e) {
-				// TODO : Throw runtine here.
-			}
-		});
 	}
 	
 	/**
@@ -184,7 +236,7 @@ public final class ClassPageBuilder {
 		final Path classPath = Paths.get(
 				new StringBuilder()
 					.append(classDoc.simpleTypeName())
-					.append(IGenerationContext.FILE_EXTENSION)
+					.append(MarkdownUtils.FILE_EXTENSION)
 					.toString());
 		final DocumentBuilder documentBuilder = DocumentBuilder.create(context, classDoc.containingPackage(), directoryPath.resolve(classPath));
 		final ClassPageBuilder builder = new ClassPageBuilder(context, documentBuilder, classDoc);

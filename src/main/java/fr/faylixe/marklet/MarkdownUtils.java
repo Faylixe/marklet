@@ -12,6 +12,9 @@ public final class MarkdownUtils {
 	/** **/
 	private static final String TABLE_SEPARATOR = " | ";
 
+	/** Extension used for markdown file. **/
+	public static final String FILE_EXTENSION = ".md";
+
 	/**
 	 * 
 	 * @param label
