@@ -82,7 +82,7 @@ public final class Marklet implements IGenerationContext {
 			if (!Files.exists(directoryPath)) {
 				Files.createDirectories(directoryPath);
 			}
-			PackagePageBuilder.build(this, directoryPath, packageDoc);
+			PackagePageBuilder.build(this, packageDoc, directoryPath);
 			return directoryPath;
 		}
 		return Paths.get(".");

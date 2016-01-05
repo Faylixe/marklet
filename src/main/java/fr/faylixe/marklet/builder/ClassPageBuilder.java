@@ -10,11 +10,11 @@ import java.util.stream.Stream;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.Doc;
 import com.sun.javadoc.FieldDoc;
-import com.sun.javadoc.MethodDoc;
 import com.sun.javadoc.PackageDoc;
 
 import fr.faylixe.marklet.IGenerationContext;
 import fr.faylixe.marklet.MarkdownUtils;
+import fr.faylixe.marklet.MarkletConstant;
 
 /**
  * 
@@ -25,17 +25,18 @@ public final class ClassPageBuilder {
 	/** */
 	private final IGenerationContext context;
 
-	/** **/
+	/** Document builder instance for filling class page content.  **/
 	private final DocumentBuilder documentBuilder;
 
-	/** **/
+	/** Target class that page is built from. **/
 	private final ClassDoc classDoc;
 
 	/**
+	 * Default constructor. 
 	 * 
 	 * @param context
-	 * @param documentBuilder
-	 * @param classDoc
+	 * @param documentBuilder Document builder instance for filling class page content.
+	 * @param classDoc Target class that page is built from.
 	 */
 	private ClassPageBuilder(final IGenerationContext context, final DocumentBuilder documentBuilder, final ClassDoc classDoc) {
 		this.context = context;
@@ -44,16 +45,18 @@ public final class ClassPageBuilder {
 	}
 	
 	/**
+	 * Indicates if the target class exposes any method.
 	 * 
-	 * @return
+	 * @return ``true`` if the target class exposes at least one method, ``false`` otherwise.
 	 */
 	private boolean hasMethod() {
 		return classDoc.methods().length > 0;
 	}
 	
 	/**
+	 * Indicates if the target class exposes any field.
 	 * 
-	 * @return
+	 * @return ``true`` if the target class exposes at least one field, ``false`` otherwise.
 	 */
 	private boolean hasField() {
 		return classDoc.fields().length > 0;
@@ -64,25 +67,25 @@ public final class ClassPageBuilder {
 	 * Consists in the class name with a H1 level,
 	 * the class hierarchy, and the comment text.
 	 * 
-	 * @throws IOException If any error occurs while writing heaer.
+	 * TODO : Processes link tags.
+	 * 
+	 * @throws IOException If any error occurs while writing header.
 	 */
 	private void buildHeader() throws IOException {
 		documentBuilder.appendHeader(classDoc.name(), 1);
 		final PackageDoc packageDoc = classDoc.containingPackage();
 		final String packageName = packageDoc.name();
-		documentBuilder.append(
-				"Package "
-				+ MarkdownUtils.buildLink(packageName, "README.md")
-				+ "<br>"
-		);
+		documentBuilder.appendText(MarkletConstant.PACKAGE + MarkdownUtils.buildLink(packageName, "README.md") + "<br>");
 		documentBuilder.appendHierarchy(classDoc);
-		documentBuilder.append(classDoc.commentText());		
+		documentBuilder.appendText(classDoc.commentText());		
 	}
 
 	/**
+	 * Returns an ordered stream of element that are provided
+	 * by the given ``supplier``, using element name for sorting.
 	 * 
-	 * @param supplier
-	 * @return
+	 * @param supplier Supplier that provides elements to stream.
+	 * @return Ordered stream.
 	 */
 	private <T extends Doc> Stream<T> getOrderedElements(final Supplier<T[]> supplier) {
 		return Arrays
@@ -125,7 +128,7 @@ public final class ClassPageBuilder {
 	private void buildFields() throws IOException {
 		if (hasField()) {
 			documentBuilder.newLine();
-			documentBuilder.appendHeader("Fields", 2);
+			documentBuilder.appendHeader(MarkletConstant.FIELDS, 2);
 			documentBuilder.initializeFieldHeader();
 			buildFields(getOrderedElements(classDoc::fields).filter(field -> !field.isStatic()));
 			buildFields(getOrderedElements(classDoc::fields).filter(FieldDoc::isStatic));
@@ -155,7 +158,7 @@ public final class ClassPageBuilder {
 	private void buildMethods() throws IOException {
 		if (hasMethod()) {
 			documentBuilder.newLine();
-			documentBuilder.appendHeader("Methods", 2);
+			documentBuilder.appendHeader(MarkletConstant.METHODS, 2);
 			getOrderedElements(classDoc::methods).forEach(method -> {
 				try {
 					documentBuilder.appendMethod(method);

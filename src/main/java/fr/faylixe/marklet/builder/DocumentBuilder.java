@@ -16,6 +16,8 @@ import com.sun.javadoc.ThrowsTag;
 import com.sun.javadoc.Type;
 
 import fr.faylixe.marklet.IGenerationContext;
+import fr.faylixe.marklet.MarkdownUtils;
+import fr.faylixe.marklet.MarkletConstant;
 
 /**
  * 
@@ -30,7 +32,7 @@ public final class DocumentBuilder {
 	private static final String HR = "---";
 
 	/** **/
-	private static final String TABLE_HEADER = "| --- | --- | --- |";
+	private static final String TABLE_HEADER = "--- | --- | --- ";
 
 	/** **/
 	private static final String METHOD_SUMMARY_HEADER = "| Type | Method |";
@@ -60,10 +62,13 @@ public final class DocumentBuilder {
 	}
 
 	/**
+	 * Appends a header to the current document,
+	 * with the given ``label`` at the given
+	 * ``level``.
 	 * 
-	 * @param label
-	 * @param level
-	 * @throws IOException
+	 * @param label Label of the header to write.
+	 * @param level Header level to use.
+	 * @throws IOException If any error occurs while writing header.
 	 */
 	public void appendHeader(final String label, final int level) throws IOException {
 		for (int i = 0; i < level; i++) {
@@ -79,7 +84,7 @@ public final class DocumentBuilder {
 	 * @param text
 	 * @throws IOException 
 	 */
-	public void append(final String text) throws IOException {
+	public void appendText(final String text) throws IOException {
 		writer.write(text);
 		writer.newLine();
 	}
@@ -150,6 +155,7 @@ public final class DocumentBuilder {
 	 */
 	public void appendMethodHeader(final MethodDoc method) throws IOException  {
 		final MethodSignatureBuilder builder = new MethodSignatureBuilder(context, method);
+		MarkdownUtils.asRow(builder.buildReturn(), builder.buildName());
 		writer.write("| ");
 		writer.write(builder.buildReturn());
 		writer.write(" | ");
@@ -225,7 +231,7 @@ public final class DocumentBuilder {
 	private void appendParameters(final ParamTag[] parameters) throws IOException {
 		if (parameters.length > 0) {
 			writer.newLine();
-			appendHeader("Parameters", 5);
+			appendHeader(MarkletConstant.PARAMETERS, 5);
 			writer.newLine();
 			for (final ParamTag parameter : parameters) {
 				writer.write("* ");
@@ -244,7 +250,7 @@ public final class DocumentBuilder {
 	private void appendReturn(final Tag[] tag) throws IOException {
 		if (tag.length > 0) {
 			writer.newLine();
-			appendHeader("Returns", 5);
+			appendHeader(MarkletConstant.RETURNS, 5);
 			writer.newLine();
 			writer.write("* ");
 			writer.write(tag[0].text());
@@ -259,7 +265,7 @@ public final class DocumentBuilder {
 	private void appendsException(final ThrowsTag[] exceptions) throws IOException {
 		if (exceptions.length > 0) {
 			writer.newLine();
-			appendHeader("Throws", 5);
+			appendHeader(MarkletConstant.THROWS, 5);
 			for (final ThrowsTag exception : exceptions) {
 				writer.write("* ");
 				writer.write(context.getClassLink(source, exception.exception())); // TODO : Link to exception class.
@@ -271,9 +277,11 @@ public final class DocumentBuilder {
 	}
 
 	/**
+	 * Finalizes document building by adding a
+	 * horizontal rule, the **marklet** generation
+	 * badge, and closing the internal writer.
 	 * 
-	 * @param path
-	 * @throws IOException 
+	 * @throws IOException If any error occurs while closing document.
 	 */
 	public void build() throws IOException {
 		writer.write(HR);
