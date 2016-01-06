@@ -1,9 +1,11 @@
 package fr.faylixe.marklet.builder;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.MethodDoc;
@@ -32,7 +34,7 @@ public final class DocumentBuilder {
 	private final IGenerationContext context;
 
 	/** **/
-	private final BufferedWriter writer;
+	private final StringBuffer writer;
 
 	/** **/
 	private final PackageDoc source;
@@ -43,10 +45,10 @@ public final class DocumentBuilder {
 	 * @param source
 	 * @param writer
 	 */
-	public DocumentBuilder(final IGenerationContext context, final PackageDoc source, final BufferedWriter writer) {
+	public DocumentBuilder(final IGenerationContext context, final PackageDoc source) {
 		this.context = context;
 		this.source = source;
-		this.writer = writer;
+		this.writer = new StringBuffer();
 	}
 
 	/**
@@ -56,9 +58,9 @@ public final class DocumentBuilder {
 	 * @param text Text to append.
 	 * @throws IOException If any error occurs while writing text.
 	 */
-	public void appendText(final String text) throws IOException {
-		writer.write(text);
-		writer.newLine();
+	public void appendText(final String text) {
+		writer.append(text);
+		newLine();
 	}
 
 	/**
@@ -70,13 +72,13 @@ public final class DocumentBuilder {
 	 * @param level Header level to use.
 	 * @throws IOException If any error occurs while writing header.
 	 */
-	public void appendHeader(final String label, final int level) throws IOException {
+	public void appendHeader(final String label, final int level) {
 		for (int i = 0; i < level; i++) {
-			writer.write('#');
+			writer.append('#');
 		}
-		writer.write(label);
-		writer.newLine();
-		writer.newLine();
+		writer.append(label);
+		newLine();
+		newLine();
 	}
 
 	/**
@@ -85,43 +87,43 @@ public final class DocumentBuilder {
 	 * @param headers Headers to write.
 	 * @throws IOException If any error occurs while writing headers.
 	 */
-	public void appendTableHeader(final String  ... headers) throws IOException {
+	public void appendTableHeader(final String  ... headers) {
 		appendTableRow(headers);
 		for (int i = 0; i < headers.length; i++) {
-			writer.write(" --- "); // TODO : Export sequence to markdown ?
+			writer.append(" --- "); // TODO : Export sequence to markdown ?
 			if (i < headers.length - 1) {
-				writer.write('|');
+				writer.append('|');
 			}
 		}
-		writer.newLine();
+		newLine();
 	}
 
 	/**
 	 * 
 	 * @param cells
 	 */
-	public void appendTableRow(final String ... cells) throws IOException {
-		writer.write("| ");
+	public void appendTableRow(final String ... cells) {
+		writer.append("| ");
 		for (final String cell : cells) {
-			writer.write(cell);
-			writer.write(" |");
+			writer.append(cell);
+			writer.append(" |");
 		}
-		writer.newLine();
+		newLine();
 	}
 
 	/**
 	 * 
 	 * @param method
 	 */
-	public void appendMethodHeader(final MethodDoc method) throws IOException  {
+	public void appendMethodHeader(final MethodDoc method) {
 		final MethodSignatureBuilder builder = new MethodSignatureBuilder(context, method);
 		MarkdownUtils.asRow(builder.buildReturn(), builder.buildName());
-		writer.write("| ");
-		writer.write(builder.buildReturn());
-		writer.write(" | ");
-		writer.write(builder.buildName());
-		writer.write(" |");
-		writer.newLine();
+		writer.append("| ");
+		writer.append(builder.buildReturn());
+		writer.append(" | ");
+		writer.append(builder.buildName());
+		writer.append(" |");
+		newLine();
 	}
 	
 	/**
@@ -129,21 +131,21 @@ public final class DocumentBuilder {
 	 * @param field
 	 * @throws IOException
 	 */
-	public void appendField(final FieldDoc field) throws IOException {
-		writer.write("| ");
-		writer.write(""); // TODO : Write link type.
-		writer.write(" | ");
-		writer.write(field.name());
-		writer.write(" |");
-		writer.newLine();
+	public void appendField(final FieldDoc field) {
+		writer.append("| ");
+		writer.append(""); // TODO : Write link type.
+		writer.append(" | ");
+		writer.append(field.name());
+		writer.append(" |");
+		newLine();
 
 	}
 
 	/**
 	 * 
 	 */
-	public void newLine() throws IOException {
-		writer.newLine();
+	public void newLine() {
+		writer.append("\n");
 	}
 
 	/**
@@ -158,17 +160,17 @@ public final class DocumentBuilder {
 	 * @param methodDoc
 	 * @throws IOException 
 	 */
-	public void appendMethod(final MethodDoc methodDoc) throws IOException {
+	public void appendMethod(final MethodDoc methodDoc) {
 		appendHeader(methodDoc.name(), 3);
-		writer.newLine();
+		newLine();
 		final String description = context.getDescription(methodDoc);
-		writer.write(description);
+		writer.append(description);
 		appendParameters(methodDoc.paramTags());
 		appendReturn(methodDoc.tags("return"));
 		appendsException(methodDoc.throwsTags());
-		writer.newLine();
-		writer.write("--");
-		writer.newLine();
+		newLine();
+		writer.append("--");
+		newLine();
 		
 	}
 
@@ -177,17 +179,17 @@ public final class DocumentBuilder {
 	 * @param parameters
 	 * @throws IOException
 	 */
-	private void appendParameters(final ParamTag[] parameters) throws IOException {
+	private void appendParameters(final ParamTag[] parameters) {
 		if (parameters.length > 0) {
-			writer.newLine();
+			newLine();
 			appendHeader(MarkletConstant.PARAMETERS, 5);
-			writer.newLine();
+			newLine();
 			for (final ParamTag parameter : parameters) {
-				writer.write("* ");
-				writer.write(parameter.parameterName());
-				writer.write(" ");
-				writer.write(parameter.parameterComment());
-				writer.newLine();
+				writer.append("* ");
+				writer.append(parameter.parameterName());
+				writer.append(" ");
+				writer.append(parameter.parameterComment());
+				newLine();
 			}
 		}
 	}
@@ -196,14 +198,14 @@ public final class DocumentBuilder {
 	 * 
 	 * @param type
 	 */
-	private void appendReturn(final Tag[] tag) throws IOException {
+	private void appendReturn(final Tag[] tag) {
 		if (tag.length > 0) {
-			writer.newLine();
+			newLine();
 			appendHeader(MarkletConstant.RETURNS, 5);
-			writer.newLine();
-			writer.write("* ");
-			writer.write(tag[0].text());
-			writer.newLine();
+			newLine();
+			writer.append("* ");
+			writer.append(tag[0].text());
+			newLine();
 		}
 	}
 
@@ -211,16 +213,16 @@ public final class DocumentBuilder {
 	 * 
 	 * @throws IOException
 	 */
-	private void appendsException(final ThrowsTag[] exceptions) throws IOException {
+	private void appendsException(final ThrowsTag[] exceptions) {
 		if (exceptions.length > 0) {
-			writer.newLine();
+			newLine();
 			appendHeader(MarkletConstant.THROWS, 5);
 			for (final ThrowsTag exception : exceptions) {
-				writer.write("* ");
-				writer.write(context.getClassLink(source, exception.exception())); // TODO : Link to exception class.
-				writer.write(" ");
-				writer.write(exception.exceptionComment());
-				writer.newLine();
+				writer.append("* ");
+				writer.append(context.getClassLink(source, exception.exception())); // TODO : Link to exception class.
+				writer.append(" ");
+				writer.append(exception.exceptionComment());
+				newLine();
 			}
 		}
 	}
@@ -232,11 +234,13 @@ public final class DocumentBuilder {
 	 * 
 	 * @throws IOException If any error occurs while closing document.
 	 */
-	public void build() throws IOException {
-		writer.write(HR);
-		writer.newLine();
-		writer.write(MARKLET_LINK);
-		writer.close();
+	public void build(final Path path) throws IOException {
+		writer.append(HR);
+		newLine();
+		writer.append(MARKLET_LINK);
+		final String content = writer.toString();
+		final InputStream stream = new ByteArrayInputStream(content.getBytes());
+		Files.copy(stream, path, StandardCopyOption.REPLACE_EXISTING);
 	}
 	
 	/**
@@ -247,10 +251,8 @@ public final class DocumentBuilder {
 	 * @return
 	 * @throws IOException
 	 */
-	public static DocumentBuilder create(final IGenerationContext context, final PackageDoc source, final Path path) throws IOException {
-		final FileWriter fileWriter = new FileWriter(path.toFile());
-		final BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-		return new DocumentBuilder(context, source, bufferedWriter);
+	public static DocumentBuilder create(final IGenerationContext context, final PackageDoc source) {
+		return new DocumentBuilder(context, source);
 	}
 
 }

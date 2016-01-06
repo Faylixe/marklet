@@ -52,10 +52,8 @@ public final class PackagePageBuilder {
 	 * Builds package header. Which consists in
 	 * the package name, and the package text
 	 * description.
-	 * 
-	 * @throws IOException If any error occurs while writing header.
 	 */
-	private void buildHeader() throws IOException {
+	private void buildHeader() {
 		documentBuilder.appendHeader(
 				new StringBuilder(MarkletConstant.PACKAGE)
 					.append(packageDoc.name())
@@ -71,15 +69,11 @@ public final class PackagePageBuilder {
 	 * Builds an index row for the given ``classDoc``.
 	 * 
 	 * @param classDoc Target class to write as an index row.
-	 * @throws IOException If any error occurs while writing row.
 	 */
 	private void buildClassRow(final ClassDoc classDoc) {
-		try {			
-			documentBuilder.appendTableRow(context.getClassLink(packageDoc, classDoc));
-		}
-		catch (final IOException e) {
-			throw new IllegalStateException(e);
-		}
+		final String classLink = context.getClassLink(packageDoc, classDoc);
+		// TODO : Build class snippet here.
+		documentBuilder.appendTableRow(classLink);
 	}
 
 	/**
@@ -91,9 +85,8 @@ public final class PackagePageBuilder {
 	 * 
 	 * @param label Label of the type categories.
 	 * @param classSupplier Type supplier.
-	 * @throws IOException If any error occurs while writing type listing.
 	 */
-	private void buildIndex(final String label, final Supplier<ClassDoc[]> classSupplier) throws IOException {
+	private void buildIndex(final String label, final Supplier<ClassDoc[]> classSupplier) {
 		final ClassDoc [] classDocs = classSupplier.get();
 		if (classDocs.length > 0) {
 			documentBuilder.appendHeader(label, 2);
@@ -113,10 +106,8 @@ public final class PackagePageBuilder {
 	 * * Interfaces
 	 * * Enumerations
 	 * * Annotations
-	 * 
-	 * @throws IOException If any error occurs while writing indexes.
 	 */
-	private void buildIndexes() throws IOException {
+	private void buildIndexes() {
 		// TODO : Build annotation index.
 		buildIndex(MarkletConstant.ENUMERATIONS, packageDoc::enums);
 		buildIndex(MarkletConstant.INTERFACES, packageDoc::interfaces);
@@ -131,15 +122,15 @@ public final class PackagePageBuilder {
 	 * @param context Context used.
 	 * @param packageDoc Package to generated documentation for.
 	 * @param directoryPath Path of the directory to write documentation in.
-	 * @throws IOException 
+	 * @throws IOException If any error occurs while writing package page.
 	 */
 	public static void build(final IGenerationContext context, final PackageDoc packageDoc, final Path directoryPath) throws IOException {
-		final Path path = directoryPath.resolve(MarkletConstant.README);
-		final DocumentBuilder documentBuilder = DocumentBuilder.create(context, packageDoc, path);
+		final DocumentBuilder documentBuilder = DocumentBuilder.create(context, packageDoc);
 		final PackagePageBuilder packageBuilder = new PackagePageBuilder(context, documentBuilder, packageDoc);
 		packageBuilder.buildHeader();
 		packageBuilder.buildIndexes();
-		documentBuilder.build();
+		final Path path = directoryPath.resolve(MarkletConstant.README);
+		documentBuilder.build(path);
 	}
 
 }

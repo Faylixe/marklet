@@ -93,10 +93,8 @@ public final class ClassPageBuilder {
 	 * Builds and writes the documentation header.
 	 * Consists in the class name with a H1 level,
 	 * the class hierarchy, and the comment text.
-	 * 
-	 * @throws IOException If any error occurs while writing header.
 	 */
-	private void buildHeader() throws IOException {
+	private void buildHeader() {
 		documentBuilder.appendHeader(classDoc.name(), 1);
 		final PackageDoc packageDoc = classDoc.containingPackage();
 		final String packageName = packageDoc.name();
@@ -128,29 +126,18 @@ public final class ClassPageBuilder {
 
 	/**
 	 * Builds the summary for all exposed methods if any.
-	 * 
-	 * @throws IOException If any error occurs while creating method summary.
 	 */
-	private void buildMethodsSummary() throws IOException {
+	private void buildMethodsSummary() {
 		if (hasMethod()) {
 			documentBuilder.appendTableHeader(MarkletConstant.METHODS_SUMMARY_HEADERS);
-			getOrderedElements(classDoc::methods).forEach(method -> {
-				try {
-					documentBuilder.appendMethodHeader(method);				
-				}
-				catch (final IOException e) {
-					// TODO : Throw runtime here.
-				}
-			});
+			getOrderedElements(classDoc::methods).forEach(documentBuilder::appendMethodHeader);
 		}
 	}
 	
 	/**
 	 * Builds the summary for all exposed fields if any.
-	 * 
-	 * @throws IOException If any error occurs while creating field summary.
 	 */
-	private void buildFieldSummary() throws IOException {
+	private void buildFieldSummary() {
 		if (hasField()) {
 			documentBuilder.appendTableHeader(MarkletConstant.FIELDS_SUMMARY_HEADERS);
 		}
@@ -158,14 +145,11 @@ public final class ClassPageBuilder {
 
 	/**
 	 * Builds the summary for all exposed constructors if any.
-	 * 
-	 * @throws IOException If any error occurs while creating constructor summary.
 	 */
-	private void buildConstructorSummary() throws IOException {
+	private void buildConstructorSummary() {
 		if (hasConstructor()) {
 			documentBuilder.appendTableHeader(MarkletConstant.CONSTRUCTOR_SUMMARY_HEADERS);
 			getOrderedElements(classDoc::constructors).forEach(constructor -> {
-				
 			});
 		}
 	}
@@ -174,10 +158,8 @@ public final class ClassPageBuilder {
 	 * Builds class summary. Consists in an overview of
 	 * available constructor, method, and field, in a
 	 * table form.
-	 * 
-	 * @throws IOException If any error occurs while writing summary.
 	 */
-	private void buildSummary() throws IOException {
+	private void buildSummary() {
 		if (hasField() || hasMethod() || hasConstructor()) {
 			documentBuilder.newLine();
 			documentBuilder.appendHeader("Summary", 2);
@@ -189,10 +171,8 @@ public final class ClassPageBuilder {
 
 	/**
 	 * Builds fields documentation.
-	 * 
-	 * @throws IOException If any error occurs while writing field documentation.
 	 */
-	private void buildFields() throws IOException {
+	private void buildFields() {
 		if (hasField()) {
 			documentBuilder.newLine();
 			documentBuilder.appendHeader(MarkletConstant.FIELDS, 2);
@@ -204,21 +184,12 @@ public final class ClassPageBuilder {
 	
 	/**
 	 * Builds methods documentation.
-	 * 
-	 * @throws IOException If any error occurs while writing method documentation.
 	 */
-	private void buildMethods() throws IOException {
+	private void buildMethods() {
 		if (hasMethod()) {
 			documentBuilder.newLine();
 			documentBuilder.appendHeader(MarkletConstant.METHODS, 2);
-			getOrderedElements(classDoc::methods).forEach(method -> {
-				try {
-					documentBuilder.appendMethod(method);
-				}
-				catch (final IOException e) {
-					// TODO : Throw runtine here.
-				}
-			});
+			getOrderedElements(classDoc::methods).forEach(documentBuilder::appendMethod);
 		}
 	}
 
@@ -238,13 +209,13 @@ public final class ClassPageBuilder {
 					.append(classDoc.simpleTypeName())
 					.append(MarkdownUtils.FILE_EXTENSION)
 					.toString());
-		final DocumentBuilder documentBuilder = DocumentBuilder.create(context, classDoc.containingPackage(), directoryPath.resolve(classPath));
+		final DocumentBuilder documentBuilder = DocumentBuilder.create(context, classDoc.containingPackage());
 		final ClassPageBuilder builder = new ClassPageBuilder(context, documentBuilder, classDoc);
 		builder.buildHeader();
 		builder.buildSummary();
 		builder.buildFields();
 		builder.buildMethods();
-		documentBuilder.build();
+		documentBuilder.build(directoryPath.resolve(classPath));
 	}
 
 }
