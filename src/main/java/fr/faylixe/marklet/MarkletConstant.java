@@ -18,6 +18,9 @@ public final class MarkletConstant {
 	/** Label for enumerations. **/
 	public static final String ENUMERATIONS = "Enumerations";
 
+	/** Label for constructor. **/
+	public static final String CONSTRUCTORS = "Constructors";
+
 	/** Label for methods. **/
 	public static final String METHODS = "Methods";
 
@@ -38,6 +41,9 @@ public final class MarkletConstant {
 
 	/** Label for parameters. **/
 	public static final String PARAMETERS = "Parameters";
+
+	/** Label for summary. **/
+	public static final String SUMMARY = "Summary";
 
 	/** **/
 	public static final String [] METHODS_SUMMARY_HEADERS = {"Type", "Method"};

@@ -130,7 +130,9 @@ public final class ClassPageBuilder {
 	private void buildMethodsSummary() {
 		if (hasMethod()) {
 			documentBuilder.appendTableHeader(MarkletConstant.METHODS_SUMMARY_HEADERS);
-			getOrderedElements(classDoc::methods).forEach(documentBuilder::appendMethodHeader);
+			getOrderedElements(classDoc::methods)
+				.filter(method -> method.overriddenMethod() == null) // TODO : Ensure predicate consistency.
+				.forEach(documentBuilder::appendMethodHeader);
 		}
 	}
 	
@@ -162,10 +164,21 @@ public final class ClassPageBuilder {
 	private void buildSummary() {
 		if (hasField() || hasMethod() || hasConstructor()) {
 			documentBuilder.newLine();
-			documentBuilder.appendHeader("Summary", 2);
+			documentBuilder.appendHeader(MarkletConstant.SUMMARY, 2);
 			buildConstructorSummary();
 			buildMethodsSummary();
 			buildFieldSummary();
+		}
+	}
+
+	/**
+	 * Builds constructors documentation.
+	 */
+	private void buildConstructors() {
+		if (hasConstructor()) {
+			documentBuilder.newLine();
+			documentBuilder.appendHeader(MarkletConstant.CONSTRUCTORS, 2);
+			getOrderedElements(classDoc::constructors).forEach(documentBuilder::appendConstructor);
 		}
 	}
 
@@ -213,6 +226,7 @@ public final class ClassPageBuilder {
 		final ClassPageBuilder builder = new ClassPageBuilder(context, documentBuilder, classDoc);
 		builder.buildHeader();
 		builder.buildSummary();
+		builder.buildConstructors();
 		builder.buildFields();
 		builder.buildMethods();
 		documentBuilder.build(directoryPath.resolve(classPath));

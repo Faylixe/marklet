@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
+import com.sun.javadoc.ConstructorDoc;
 import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.MethodDoc;
 import com.sun.javadoc.PackageDoc;
@@ -125,11 +126,17 @@ public final class DocumentBuilder {
 		writer.append(" |");
 		newLine();
 	}
+
+	/**
+	 * 
+	 */
+	public void newLine() {
+		writer.append("\n");
+	}
 	
 	/**
 	 * 
 	 * @param field
-	 * @throws IOException
 	 */
 	public void appendField(final FieldDoc field) {
 		writer.append("| ");
@@ -138,30 +145,30 @@ public final class DocumentBuilder {
 		writer.append(field.name());
 		writer.append(" |");
 		newLine();
-
 	}
-
+	
 	/**
 	 * 
+	 * @param constructorDoc
 	 */
-	public void newLine() {
-		writer.append("\n");
-	}
-
-	/**
-	 * 
-	 * @param fieldDoc
-	 */
-	public void append(final FieldDoc fieldDoc) {
+	public void appendConstructor(final ConstructorDoc constructorDoc) {
+		appendHeader(constructorDoc.flatSignature(), 3);
+		newLine();
+		final String description = context.getDescription(constructorDoc);
+		writer.append(description);
+		appendParameters(constructorDoc.paramTags());
+		appendsException(constructorDoc.throwsTags());
+		newLine();
+		writer.append(HR);
+		newLine();
 	}
 
 	/**
 	 * 
 	 * @param methodDoc
-	 * @throws IOException 
 	 */
 	public void appendMethod(final MethodDoc methodDoc) {
-		appendHeader(methodDoc.name(), 3);
+		appendHeader(methodDoc.flatSignature(), 3);
 		newLine();
 		final String description = context.getDescription(methodDoc);
 		writer.append(description);
@@ -169,7 +176,7 @@ public final class DocumentBuilder {
 		appendReturn(methodDoc.tags("return"));
 		appendsException(methodDoc.throwsTags());
 		newLine();
-		writer.append("--");
+		writer.append(HR);
 		newLine();
 		
 	}
