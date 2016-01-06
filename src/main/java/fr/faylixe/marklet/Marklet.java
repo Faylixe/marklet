@@ -13,26 +13,30 @@ import fr.faylixe.marklet.builder.ClassPageBuilder;
 import fr.faylixe.marklet.builder.PackagePageBuilder;
 
 /**
+ * Marklet entry point. This class declares
+ * the {@link #start(RootDoc)} method required
+ * by the doclet API in order to be called by the
+ * javadoc tool.
  * 
  * @author fv
  */
 public final class Marklet implements IGenerationContext {
 
-	/** **/
-	private final RootDoc root;
+	/** Command line options that have been parsed. **/
+	private final MarkletOptions options;
 
-	/** **/
-	private final String outputDirectory;
+	/** Documentation root provided by the doclet API. **/
+	private final RootDoc root;
 
 	/**
 	 * Default constructor.
 	 * 
-	 * @param options
-	 * @param root
+	 * @param options Command line options that have been parsed.
+	 * @param root Documentation root provided by the doclet API.
 	 */
 	private Marklet(final MarkletOptions options, final RootDoc root) {
 		this.root = root;
-		this.outputDirectory = "javadoc/"; // TODO : Retrives from options.
+		this.options = options;
 	}
 
 	/** {@inheritDoc} **/
@@ -41,11 +45,8 @@ public final class Marklet implements IGenerationContext {
 		return root.classNamed(qualifiedName) != null;
 	}
 	
-	/**
-	 * 
-	 * @param qualifiedName
-	 * @return
-	 */
+	/** {@inheritDoc} **/
+	@Override
 	public boolean containsPackage(final String qualifiedName) {
 		return root.packageNamed(qualifiedName) != null;
 	}
@@ -61,7 +62,7 @@ public final class Marklet implements IGenerationContext {
 	private Path getPackageDirectory(final String packageName) {
 		final String directory = packageName.replace('.', '/');
 		final String path = new StringBuilder()
-			.append(outputDirectory)
+			.append(options.getOutputDirectory())
 			.append(directory)
 			.toString();
 		return Paths.get(path);
@@ -69,7 +70,7 @@ public final class Marklet implements IGenerationContext {
 
 	/**
 	 * Generates package documentation for the given
-	 * <tt>packageDoc</tt>.
+	 * ``packageDoc``.
 	 * 
 	 * @param packageDoc Package to generate documentation for.
 	 * @throws IOException If any error occurs while creating file or directories.
@@ -89,11 +90,13 @@ public final class Marklet implements IGenerationContext {
 	}
 
 	/**
+	 * Generates documentation file for each package.
 	 * 
-	 * @throws IOException
+	 * @throws IOException If any error occurs during generation process.
 	 */
 	private void buildPackages() throws IOException {
-		final Set<PackageDoc> packages = new HashSet<PackageDoc>();
+		// TODO : Consider method root.specifiedPackages();
+		final Set<PackageDoc> packages = new HashSet<PackageDoc>(); // TODO : Ensures 
 		for (final ClassDoc classDoc : root.classes()) {
 			final PackageDoc packageDoc = classDoc.containingPackage();
 			if (!packages.contains(packageDoc)) {
@@ -104,8 +107,8 @@ public final class Marklet implements IGenerationContext {
 	}
 
 	/**
-	 * Builds the javadoc, for each available classes
-	 * and associated package.
+	 *	Generates documentation file for each classes,
+	 *	enumerations, interfaces, or annotations.
 	 * 
 	 * @throws IOException If any error occurs during generation process.
 	 */
@@ -125,7 +128,7 @@ public final class Marklet implements IGenerationContext {
 	 */
 	private boolean start() {
 		try {
-			final Path outputDirectory = Paths.get("");//getOutputDirectory());
+			final Path outputDirectory = Paths.get(options.getOutputDirectory());
 			if (!Files.exists(outputDirectory)) {
 				Files.createDirectories(outputDirectory);
 			}
@@ -140,11 +143,11 @@ public final class Marklet implements IGenerationContext {
 	}
 
 	/**
-	 * Doclet entry point. Parses user provided options
-	 * and starts a Marklet execution.
+	 * **Doclet** entry point. Parses user provided options
+	 * and starts a **Marklet** execution.
 	 * 
 	 * @param root Doclet API root.
-	 * @return <tt>true</tt> if the generation went well, <tt>false<tt> otherwise.
+	 * @return ``true`` if the generation went well, ``false`` otherwise.
 	 */
 	public static boolean start(final RootDoc root) {
 		final MarkletOptions options = MarkletOptions.parse(root.options());

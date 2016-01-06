@@ -125,7 +125,7 @@ public final class PackagePageBuilder {
 	 * @throws IOException If any error occurs while writing package page.
 	 */
 	public static void build(final IGenerationContext context, final PackageDoc packageDoc, final Path directoryPath) throws IOException {
-		final DocumentBuilder documentBuilder = DocumentBuilder.create(context, packageDoc);
+		final DocumentBuilder documentBuilder = new DocumentBuilder(context, packageDoc);
 		final PackagePageBuilder packageBuilder = new PackagePageBuilder(context, documentBuilder, packageDoc);
 		packageBuilder.buildHeader();
 		packageBuilder.buildIndexes();

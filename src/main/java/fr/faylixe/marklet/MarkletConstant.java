@@ -2,6 +2,7 @@ package fr.faylixe.marklet;
 
 /**
  * 
+ * 
  * @author fv
  */
 public final class MarkletConstant {
@@ -45,14 +46,23 @@ public final class MarkletConstant {
 	/** Label for summary. **/
 	public static final String SUMMARY = "Summary";
 
-	/** **/
+	/** Header labels for methods summary. **/
 	public static final String [] METHODS_SUMMARY_HEADERS = {"Type", "Method"};
 	
-	/** **/
+	/** Header labels for constructors summary. **/
 	public static final String [] CONSTRUCTOR_SUMMARY_HEADERS = {"Constructor"};
 
-	/** **/
+	/** Header labels for fields summary. **/
 	public static final String [] FIELDS_SUMMARY_HEADERS = {"Type", "Name", "Description"};
+
+	/** Marklet link using dynamic badge. **/
+	public static final String BADGE = "[![Marklet](https://img.shields.io/badge/Generated%20by-Marklet-green.svg)](https://github.com/Faylixe/marklet)";
+
+	/** Markdown sequence for cell separator. **/
+	public static final String TABLE_SEPARATOR = " | ";
+
+	/** Markdown sequence for horizontal rules. **/
+	public static final String HR = "---";
 
 	/**
 	 * Private constructor for avoiding instantiation.

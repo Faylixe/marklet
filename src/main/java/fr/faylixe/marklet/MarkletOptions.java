@@ -1,75 +1,50 @@
 package fr.faylixe.marklet;
 
 /**
+ * Class that reads and stores provided options
+ * for javadoc execution. Options that we care about are :
+ * 
+ * * Output directory
  * 
  * @author fv
  */
 public final class MarkletOptions {
 
-	/** **/
-	private static final String SOURCE_PATH_OPTION = "-sourceurl";
+	/** Default output directory to use. **/
+	private static final String DEFAULT_OUTPUT_DIRECTORY = "javadoc/";
 
-	/** **/
-	private static final String DOCUMENTATION_PATH_OPTION = "-documentationurl";
+	/** Option name for the target output directory. **/
+	private static final String OUTPUT_DIRECTORY_OPTION = "";
 
-	/** **/
-	private String sourcePath;
-
-	/** **/
-	private String documentationPath;
+	/** Output directory file are generated in. **/
+	private String outputDirectory;
 
 	/**
-	 * 
+	 * Default constructor.
+	 * Sets options with their default parameters if availaible.
 	 */
 	private MarkletOptions() {
-		
+		this.outputDirectory = DEFAULT_OUTPUT_DIRECTORY;
 	}
 
 	/**
+	 * Getter for the output directory option.
 	 * 
-	 * @return
+	 * @return Output directory file are generated in.
+	 * @see #outputDirectory
 	 */
-	public String getSourcePath() {
-		return sourcePath;
+	public String getOutputDirectory() {
+		return outputDirectory;
 	}
-
+	
 	/**
+	 * Private setter that sets the output directory option.
 	 * 
-	 * @return
+	 * @param outputDirectory Output directory file are generated in.
+	 * @see #outputDirectory
 	 */
-	public String getDocumentationPath() {
-		return documentationPath;
-	}
-
-	/**
-	 * 
-	 * @param name
-	 * @param value
-	 */
-	private void set(final String name, final String value) {
-		if (SOURCE_PATH_OPTION.equals(name)) {
-			sourcePath = value;
-		}
-		else if (DOCUMENTATION_PATH_OPTION.equals(name)) {
-			documentationPath = value;
-		}
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public boolean isConsistent() {
-		return sourcePath != null && documentationPath != null;
-	}
-
-	/**
-	 * 
-	 * @param name
-	 * @return
-	 */
-	private static boolean isOption(final String name) {
-		return SOURCE_PATH_OPTION.equals(name) || DOCUMENTATION_PATH_OPTION.equals(name);
+	private void setOutputDirectory(final String outputDirectory) {
+		this.outputDirectory = outputDirectory;
 	}
 
 	/**
@@ -81,12 +56,8 @@ public final class MarkletOptions {
 		final MarkletOptions options = new MarkletOptions();
 		for (final String [] option : rawOptions) {
 			final String name = option[0];
-			if (isOption(name)) {
-				if (option.length < 2) {
-					throw new IllegalArgumentException("Error when parsing option :'(");
-				}
-				final String value = option[1];
-				options.set(name, value);
+			if (name == OUTPUT_DIRECTORY_OPTION) {
+				options.setOutputDirectory(option[1]);
 			}
 		}
 		return options;

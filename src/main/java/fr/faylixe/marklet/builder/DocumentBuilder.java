@@ -16,7 +16,6 @@ import com.sun.javadoc.Tag;
 import com.sun.javadoc.ThrowsTag;
 
 import fr.faylixe.marklet.IGenerationContext;
-import fr.faylixe.marklet.MarkdownUtils;
 import fr.faylixe.marklet.MarkletConstant;
 
 /**
@@ -25,26 +24,20 @@ import fr.faylixe.marklet.MarkletConstant;
  */
 public final class DocumentBuilder {
 
-	/** **/
-	private static final String MARKLET_LINK = "[![Marklet](https://img.shields.io/badge/Generated%20by-Marklet-green.svg)](https://github.com/Faylixe/marklet)";
-
-	/** **/
-	private static final String HR = "---";
-
-	/** **/
+	/** Generation context used. **/
 	private final IGenerationContext context;
 
-	/** **/
+	/** Container in which document content is written. **/
 	private final StringBuffer writer;
 
-	/** **/
+	/** Target source package from which document will be written. **/
 	private final PackageDoc source;
 
 	/**
+	 * Default constructor. 
 	 * 
-	 * @param context
-	 * @param source
-	 * @param writer
+	 * @param context Generation context used. 
+	 * @param source Target source package from which document will be written. 
 	 */
 	public DocumentBuilder(final IGenerationContext context, final PackageDoc source) {
 		this.context = context;
@@ -104,10 +97,11 @@ public final class DocumentBuilder {
 	 * @param cells
 	 */
 	public void appendTableRow(final String ... cells) {
-		writer.append("| ");
-		for (final String cell : cells) {
-			writer.append(cell);
-			writer.append(" |");
+		for (int i = 0; i < cells.length; i++) {
+			writer.append(cells[i]);
+			if (i < cells.length - 1) {
+				writer.append(MarkletConstant.TABLE_SEPARATOR);
+			}
 		}
 		newLine();
 	}
@@ -118,13 +112,8 @@ public final class DocumentBuilder {
 	 */
 	public void appendMethodHeader(final MethodDoc method) {
 		final MethodSignatureBuilder builder = new MethodSignatureBuilder(context, method);
-		MarkdownUtils.asRow(builder.buildReturn(), builder.buildName());
-		writer.append("| ");
-		writer.append(builder.buildReturn());
-		writer.append(" | ");
-		writer.append(builder.buildName());
-		writer.append(" |");
-		newLine();
+		// TODO : Build link and row structure here.
+		appendTableRow(builder.buildReturn(), builder.buildName());
 	}
 
 	/**
@@ -159,7 +148,7 @@ public final class DocumentBuilder {
 		appendParameters(constructorDoc.paramTags());
 		appendsException(constructorDoc.throwsTags());
 		newLine();
-		writer.append(HR);
+		writer.append(MarkletConstant.HR);
 		newLine();
 	}
 
@@ -176,7 +165,7 @@ public final class DocumentBuilder {
 		appendReturn(methodDoc.tags("return"));
 		appendsException(methodDoc.throwsTags());
 		newLine();
-		writer.append(HR);
+		writer.append(MarkletConstant.HR);
 		newLine();
 		
 	}
@@ -242,24 +231,12 @@ public final class DocumentBuilder {
 	 * @throws IOException If any error occurs while closing document.
 	 */
 	public void build(final Path path) throws IOException {
-		writer.append(HR);
+		writer.append(MarkletConstant.HR);
 		newLine();
-		writer.append(MARKLET_LINK);
+		writer.append(MarkletConstant.BADGE);
 		final String content = writer.toString();
 		final InputStream stream = new ByteArrayInputStream(content.getBytes());
 		Files.copy(stream, path, StandardCopyOption.REPLACE_EXISTING);
-	}
-	
-	/**
-	 * 
-	 * @param context
-	 * @param source
-	 * @param path
-	 * @return
-	 * @throws IOException
-	 */
-	public static DocumentBuilder create(final IGenerationContext context, final PackageDoc source) {
-		return new DocumentBuilder(context, source);
 	}
 
 }

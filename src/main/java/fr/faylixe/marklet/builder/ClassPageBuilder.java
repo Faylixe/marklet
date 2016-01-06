@@ -16,6 +16,11 @@ import fr.faylixe.marklet.MarkdownUtils;
 import fr.faylixe.marklet.MarkletConstant;
 
 /**
+ * Builder that aims to create documentation
+ * page for a given ``class``. As for a standard
+ * class javadoc generation, it will contains a
+ * class summary, followed by details about class
+ * field, constructor, and methods.
  * 
  * @author fv
  */
@@ -134,6 +139,7 @@ public final class ClassPageBuilder {
 				.filter(method -> method.overriddenMethod() == null) // TODO : Ensure predicate consistency.
 				.forEach(documentBuilder::appendMethodHeader);
 		}
+		// TODO : Build inherited method hierachy here.
 	}
 	
 	/**
@@ -208,8 +214,8 @@ public final class ClassPageBuilder {
 
 	/**
 	 * Builds and writes the documentation file
-	 * associated to the given <tt>classDoc</tt>
-	 * into the directory denoted by the given path.
+	 * associated to the given ``classDoc`` into
+	 * the directory denoted by the given ``directoryPath``.
 	 * 
 	 * @param context Context used.
 	 * @param classDoc Class to generated documentation for.
@@ -222,7 +228,7 @@ public final class ClassPageBuilder {
 					.append(classDoc.simpleTypeName())
 					.append(MarkdownUtils.FILE_EXTENSION)
 					.toString());
-		final DocumentBuilder documentBuilder = DocumentBuilder.create(context, classDoc.containingPackage());
+		final DocumentBuilder documentBuilder = new DocumentBuilder(context, classDoc.containingPackage());
 		final ClassPageBuilder builder = new ClassPageBuilder(context, documentBuilder, classDoc);
 		builder.buildHeader();
 		builder.buildSummary();
