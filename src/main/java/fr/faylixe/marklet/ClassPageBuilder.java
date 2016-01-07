@@ -1,4 +1,4 @@
-package fr.faylixe.marklet.builder;
+package fr.faylixe.marklet;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -9,11 +9,8 @@ import java.util.stream.Stream;
 
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.Doc;
+import com.sun.javadoc.MethodDoc;
 import com.sun.javadoc.PackageDoc;
-
-import fr.faylixe.marklet.IGenerationContext;
-import fr.faylixe.marklet.MarkdownUtils;
-import fr.faylixe.marklet.MarkletConstant;
 
 /**
  * Builder that aims to create documentation
@@ -76,6 +73,15 @@ public final class ClassPageBuilder {
 	}
 
 	/**
+	 * 
+	 * @param method
+	 * @return
+	 */
+	private boolean isInherited(final MethodDoc method) {
+		return method.commentText() != "{@inheritDoc}";
+	}
+
+	/**
 	 * Builds and write a class hierarchy from the
 	 * current class. Such hierarchy consists in the
 	 * class inheritance path.
@@ -134,10 +140,13 @@ public final class ClassPageBuilder {
 	 */
 	private void buildMethodsSummary() {
 		if (hasMethod()) {
+			documentBuilder.appendHeader(MarkletConstant.METHODS, 4);
 			documentBuilder.appendTableHeader(MarkletConstant.METHODS_SUMMARY_HEADERS);
 			getOrderedElements(classDoc::methods)
-				.filter(method -> method.overriddenMethod() == null) // TODO : Ensure predicate consistency.
-				.forEach(documentBuilder::appendMethodHeader);
+				.filter(this::isInherited)
+				.map(context::getRowSignature)
+				.forEach(documentBuilder::appendTableRow);
+			documentBuilder.newLine();
 		}
 		// TODO : Build inherited method hierachy here.
 	}
@@ -148,6 +157,7 @@ public final class ClassPageBuilder {
 	private void buildFieldSummary() {
 		if (hasField()) {
 			documentBuilder.appendTableHeader(MarkletConstant.FIELDS_SUMMARY_HEADERS);
+			documentBuilder.newLine();
 		}
 	}
 
@@ -156,9 +166,11 @@ public final class ClassPageBuilder {
 	 */
 	private void buildConstructorSummary() {
 		if (hasConstructor()) {
-			documentBuilder.appendTableHeader(MarkletConstant.CONSTRUCTOR_SUMMARY_HEADERS);
-			getOrderedElements(classDoc::constructors).forEach(constructor -> {
-			});
+			documentBuilder.appendHeader(MarkletConstant.CONSTRUCTORS, 4);
+			getOrderedElements(classDoc::constructors)
+				.map(context::getItemSignature)
+				.forEach(documentBuilder::appendText);;
+			documentBuilder.newLine();
 		}
 	}
 

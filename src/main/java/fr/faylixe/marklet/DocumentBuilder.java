@@ -1,4 +1,4 @@
-package fr.faylixe.marklet.builder;
+package fr.faylixe.marklet;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -8,15 +8,13 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 import com.sun.javadoc.ConstructorDoc;
+import com.sun.javadoc.ExecutableMemberDoc;
 import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.MethodDoc;
 import com.sun.javadoc.PackageDoc;
 import com.sun.javadoc.ParamTag;
 import com.sun.javadoc.Tag;
 import com.sun.javadoc.ThrowsTag;
-
-import fr.faylixe.marklet.IGenerationContext;
-import fr.faylixe.marklet.MarkletConstant;
 
 /**
  * 
@@ -83,11 +81,17 @@ public final class DocumentBuilder {
 	 */
 	public void appendTableHeader(final String  ... headers) {
 		appendTableRow(headers);
+		if (headers.length == 1) {
+			writer.append("| ");
+		}
 		for (int i = 0; i < headers.length; i++) {
 			writer.append(" --- "); // TODO : Export sequence to markdown ?
 			if (i < headers.length - 1) {
 				writer.append('|');
 			}
+		}
+		if (headers.length == 1) {
+			writer.append(" |");
 		}
 		newLine();
 	}
@@ -97,23 +101,32 @@ public final class DocumentBuilder {
 	 * @param cells
 	 */
 	public void appendTableRow(final String ... cells) {
+		if (cells.length == 1) {
+			writer.append("| ");
+		}
+
 		for (int i = 0; i < cells.length; i++) {
 			writer.append(cells[i]);
 			if (i < cells.length - 1) {
 				writer.append(MarkletConstant.TABLE_SEPARATOR);
 			}
 		}
+		if (cells.length == 1) {
+			writer.append(" |");
+		}
 		newLine();
 	}
 
 	/**
 	 * 
-	 * @param method
+	 * @param member
 	 */
-	public void appendMethodHeader(final MethodDoc method) {
-		final MethodSignatureBuilder builder = new MethodSignatureBuilder(context, method);
-		// TODO : Build link and row structure here.
-		appendTableRow(builder.buildReturn(), builder.buildName());
+	private void appendSignature(final ExecutableMemberDoc member) {
+		final String signature = new StringBuilder()
+			.append(member.name())
+			.append(member.flatSignature())
+			.toString();
+		appendHeader(signature, 3);
 	}
 
 	/**
@@ -135,13 +148,13 @@ public final class DocumentBuilder {
 		writer.append(" |");
 		newLine();
 	}
-	
+
 	/**
 	 * 
 	 * @param constructorDoc
 	 */
 	public void appendConstructor(final ConstructorDoc constructorDoc) {
-		appendHeader(constructorDoc.flatSignature(), 3);
+		appendSignature(constructorDoc);
 		newLine();
 		final String description = context.getDescription(constructorDoc);
 		writer.append(description);
@@ -157,7 +170,7 @@ public final class DocumentBuilder {
 	 * @param methodDoc
 	 */
 	public void appendMethod(final MethodDoc methodDoc) {
-		appendHeader(methodDoc.flatSignature(), 3);
+		appendSignature(methodDoc);
 		newLine();
 		final String description = context.getDescription(methodDoc);
 		writer.append(description);

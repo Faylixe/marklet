@@ -4,9 +4,13 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.Doc;
+import com.sun.javadoc.ExecutableMemberDoc;
+import com.sun.javadoc.MethodDoc;
 import com.sun.javadoc.PackageDoc;
+import com.sun.javadoc.Parameter;
 import com.sun.javadoc.RootDoc;
 import com.sun.javadoc.SeeTag;
+import com.sun.javadoc.Type;
 
 /**
  * An {@link IGenerationContext} aims to wrap the
@@ -63,6 +67,25 @@ public interface IGenerationContext {
 		// TODO : Figure out what can be returned here ?
 		return "";
 	}
+	
+	/**
+	 * 
+	 * @param source
+	 * @param type
+	 * @return
+	 */
+	default String getTypeLink(final PackageDoc source, final Type type) {
+		final StringBuilder returnBuilder = new StringBuilder();
+		if (type.isPrimitive()) {
+			returnBuilder.append(MarkdownUtils.bold(type.simpleTypeName()));
+		}
+		else {
+			final ClassDoc classDoc = type.asClassDoc();
+			final String link = getClassLink(source, classDoc);
+			returnBuilder.append(link);
+		}
+		return returnBuilder.toString();
+	}
 
 	/**
 	 * This methods will process the given ``doc``
@@ -77,6 +100,68 @@ public interface IGenerationContext {
 			tag.referencedClass(); // TODO : Build markdown link here.
 		}
 		return doc.commentText();
+	}
+
+	/**
+	 * 
+	 * @param member
+	 * @return
+	 */
+	default String getReturn(final ExecutableMemberDoc member) {
+		final String modifiers = MarkdownUtils.bold(member.modifiers());
+		final StringBuilder returnBuilder = new StringBuilder(modifiers);
+		if (member instanceof MethodDoc) {
+			final MethodDoc method = (MethodDoc) member;
+			returnBuilder
+				.append(' ')
+				.append(getTypeLink(method.containingPackage(), method.returnType()));
+		}
+		return returnBuilder.toString();
+	}
+	
+	/**
+	 * 
+	 * @param member
+	 * @return
+	 */
+	default String getLinkedName(final ExecutableMemberDoc member) {
+		final StringBuilder anchorBuilder = new StringBuilder()
+			.append('#')
+			.append(member.name());
+		final Parameter[] parameters = member.parameters();
+		for (int i = 0; i < parameters.length; i++) {
+			anchorBuilder.append(parameters[i].typeName());
+			if (i < parameters.length - 1) {
+				anchorBuilder.append('-');
+			}
+		}
+		return MarkdownUtils.buildLink(member.name(), anchorBuilder.toString().toLowerCase());
+	}
+
+	/**
+	 * 
+	 * @param member
+	 * @return
+	 */
+	default String[] getRowSignature(final ExecutableMemberDoc member) {
+		return new String[] {
+				getReturn(member),
+				getLinkedName(member)
+		};
+	}
+	
+	/**
+	 * 
+	 * @param member
+	 * @return
+	 */
+	default String getItemSignature(final ExecutableMemberDoc member) {
+		return new StringBuilder()
+		.append("* ")
+		.append(getReturn(member))
+		.append(' ')
+		.append(getLinkedName(member))
+		.toString();
 	}
 
 	/**
@@ -102,11 +187,10 @@ public interface IGenerationContext {
 		for (int i = 0; i < StringUtils.countMatches(back, '.'); i++) {
 			builder.append("../");
 		}
-		final String forward = target.substring(start);
+		final String forward = target.substring(start + 1);
 		builder.append(forward.replace('.', '/'));
 		builder.append('/');
 		return builder.toString();
 	}
-
 	
 }

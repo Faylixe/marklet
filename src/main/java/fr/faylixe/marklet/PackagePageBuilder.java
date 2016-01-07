@@ -1,4 +1,4 @@
-package fr.faylixe.marklet.builder;
+package fr.faylixe.marklet;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -7,9 +7,6 @@ import java.util.function.Supplier;
 
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.PackageDoc;
-
-import fr.faylixe.marklet.IGenerationContext;
-import fr.faylixe.marklet.MarkletConstant;
 
 /**
  * Builder that aims to create documentation
@@ -66,17 +63,6 @@ public final class PackagePageBuilder {
 	}
 
 	/**
-	 * Builds an index row for the given ``classDoc``.
-	 * 
-	 * @param classDoc Target class to write as an index row.
-	 */
-	private void buildClassRow(final ClassDoc classDoc) {
-		final String classLink = context.getClassLink(packageDoc, classDoc);
-		// TODO : Build class snippet here.
-		documentBuilder.appendTableRow(classLink);
-	}
-
-	/**
 	 * Builds a class based index, namely list each
 	 * type in a markdown table. Such type could be
 	 * either class, interface, or enumeration.
@@ -93,7 +79,10 @@ public final class PackagePageBuilder {
 			documentBuilder.appendTableHeader(MarkletConstant.NAME);
 			Arrays
 				.stream(classDocs)
-				.forEach(this::buildClassRow);
+				.forEach(classDoc -> {
+					final String classLink = context.getClassLink(packageDoc, classDoc);
+					documentBuilder.appendTableRow(classLink);					
+				});
 			documentBuilder.newLine();
 		}
 	}

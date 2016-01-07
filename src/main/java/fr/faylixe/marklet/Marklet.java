@@ -9,9 +9,6 @@ import java.util.Set;
 
 import com.sun.javadoc.*;
 
-import fr.faylixe.marklet.builder.ClassPageBuilder;
-import fr.faylixe.marklet.builder.PackagePageBuilder;
-
 /**
  * Marklet entry point. This class declares
  * the {@link #start(RootDoc)} method required

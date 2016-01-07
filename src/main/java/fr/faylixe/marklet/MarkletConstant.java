@@ -34,6 +34,9 @@ public final class MarkletConstant {
 	/** Label for name. **/
 	public static final String NAME = "Name";
 
+	/** Label for description. **/
+	public static final String DESCRIPTION = "Description";
+
 	/** Label for throws. **/
 	public static final String THROWS = "Throws";
 
@@ -47,11 +50,8 @@ public final class MarkletConstant {
 	public static final String SUMMARY = "Summary";
 
 	/** Header labels for methods summary. **/
-	public static final String [] METHODS_SUMMARY_HEADERS = {"Type", "Method"};
+	public static final String [] METHODS_SUMMARY_HEADERS = {"Type and modifiers", "Method signature"};
 	
-	/** Header labels for constructors summary. **/
-	public static final String [] CONSTRUCTOR_SUMMARY_HEADERS = {"Constructor"};
-
 	/** Header labels for fields summary. **/
 	public static final String [] FIELDS_SUMMARY_HEADERS = {"Type", "Name", "Description"};
 
