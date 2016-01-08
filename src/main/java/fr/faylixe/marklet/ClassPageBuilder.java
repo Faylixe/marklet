@@ -156,6 +156,23 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 	}
 	
 	/**
+	 * 
+	 */
+	public void inheritedMethodSummary() {
+		ClassDoc current = classDoc.superclass();
+		while (current != null) {
+			header(5);
+			text("Inherited method from ");
+			classLink(getSource(), current);
+			newLine();
+			for (final MethodDoc methodDoc : current.methods()) {
+				link(methodDoc.flatSignature(), ""); // TODO : Build method link.
+			}
+			current = current.superclass();
+		}
+	}
+	
+	/**
 	 * Appends to the current document the
 	 * field summary if any field is exposed.
 	 */

@@ -55,6 +55,15 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	}
 
 	/**
+	 * Source getter.
+	 * 
+	 * @return Target source package from which document will be written.
+	 */
+	public final PackageDoc getSource() {
+		return source;
+	}
+
+	/**
 	 * Appends to the current document a valid markdown link
 	 * that aims to be the shortest one, by using the
 	 * {@link #getPath(String, String)} method. The
@@ -100,6 +109,15 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 			final ClassDoc classDoc = type.asClassDoc();
 			classLink(source, classDoc);
 		}
+	}
+	
+	/**
+	 * 
+	 * @param source
+	 * @param method
+	 */
+	public void methodLink(final PackageDoc source, final MethodDoc method) {
+		// TODO : Add method linking method here.
 	}
 
 	/**

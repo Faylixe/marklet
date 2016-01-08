@@ -1,7 +1,8 @@
 package fr.faylixe.marklet;
 
 /**
- * 
+ * Enumerations of text constant used
+ * during documentation generation.
  * 
  * @author fv
  */
@@ -50,7 +51,10 @@ public final class MarkletConstant {
 	public static final String SUMMARY = "Summary";
 
 	/** Header labels for methods summary. **/
-	public static final String [] METHODS_SUMMARY_HEADERS = {"Type and modifiers", "Method signature"};
+	public static final String [] METHODS_SUMMARY_HEADERS = {
+		"Type and modifiers",
+		"Method signature"
+	};
 
 	/** Marklet link using dynamic badge. **/
 	public static final String BADGE = "[![Marklet](https://img.shields.io/badge/Generated%20by-Marklet-green.svg)](https://github.com/Faylixe/marklet)";
