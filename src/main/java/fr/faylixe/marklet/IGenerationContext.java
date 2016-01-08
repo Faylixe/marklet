@@ -57,27 +57,33 @@ public interface IGenerationContext {
 	default String getClassLink(final PackageDoc source, final ClassDoc target) {
 		if (containsClass(target.qualifiedName())) {
 			final String path = getPath(source.name(), target.containingPackage().name());
-			final StringBuilder urlBuilder = new StringBuilder();
+			final StringBuffer urlBuilder = new StringBuffer();
 			urlBuilder
 				.append(path)
 				.append(target.simpleTypeName())
-				.append(MarkdownUtils.FILE_EXTENSION);
-			return MarkdownUtils.buildLink(target.simpleTypeName(), urlBuilder.toString());
+				.append(Markdown.FILE_EXTENSION);
+			return Markdown.link(target.simpleTypeName(), urlBuilder.toString());
 		}
 		// TODO : Figure out what can be returned here ?
 		return "";
 	}
 	
 	/**
+	 * Creates and returns a valid markdown link
+	 * for the given ``type``. If this ``type``
+	 * is a primitive one, then only a bold label
+	 * is produced. Otherwise it return a link
+	 * created by the {@link #getClassLink(PackageDoc, ClassDoc)}
+	 * method.
 	 * 
-	 * @param source
-	 * @param type
-	 * @return
+	 * @param source Source package to start URL from.
+	 * @param type Target type to reach from this package.
+	 * @return Bold label if the given ``type`` is primitive, a valid class link otherwise.
 	 */
 	default String getTypeLink(final PackageDoc source, final Type type) {
-		final StringBuilder returnBuilder = new StringBuilder();
+		final StringBuffer returnBuilder = new StringBuffer();
 		if (type.isPrimitive()) {
-			returnBuilder.append(MarkdownUtils.bold(type.simpleTypeName()));
+			returnBuilder.append(Markdown.bold(type.simpleTypeName()));
 		}
 		else {
 			final ClassDoc classDoc = type.asClassDoc();
@@ -103,13 +109,17 @@ public interface IGenerationContext {
 	}
 
 	/**
+	 * Builds and returns ``member`` returns label,
+	 * which is composed of the given ``member``
+	 * modifiers if any, followed by the return 
+	 * type link, if the given ``member`` is a method, 
 	 * 
-	 * @param member
-	 * @return
+	 * @param member Member to build return label for.
+	 * @return Built label.
 	 */
 	default String getReturn(final ExecutableMemberDoc member) {
-		final String modifiers = MarkdownUtils.bold(member.modifiers());
-		final StringBuilder returnBuilder = new StringBuilder(modifiers);
+		final String modifiers = Markdown.bold(member.modifiers());
+		final StringBuffer returnBuilder = new StringBuffer().append(modifiers);
 		if (member instanceof MethodDoc) {
 			final MethodDoc method = (MethodDoc) member;
 			returnBuilder
@@ -118,30 +128,13 @@ public interface IGenerationContext {
 		}
 		return returnBuilder.toString();
 	}
-	
-	/**
-	 * 
-	 * @param member
-	 * @return
-	 */
-	default String getLinkedName(final ExecutableMemberDoc member) {
-		final StringBuilder anchorBuilder = new StringBuilder()
-			.append('#')
-			.append(member.name());
-		final Parameter[] parameters = member.parameters();
-		for (int i = 0; i < parameters.length; i++) {
-			anchorBuilder.append(parameters[i].typeName());
-			if (i < parameters.length - 1) {
-				anchorBuilder.append('-');
-			}
-		}
-		return MarkdownUtils.buildLink(member.name(), anchorBuilder.toString().toLowerCase());
-	}
 
 	/**
+	 * Builds and returns signature for the given
+	 * ``member`` as a markdown table row.
 	 * 
-	 * @param member
-	 * @return
+	 * @param member Member to build table row from.
+	 * @return Built row as an array.
 	 */
 	default String[] getRowSignature(final ExecutableMemberDoc member) {
 		return new String[] {
@@ -151,17 +144,39 @@ public interface IGenerationContext {
 	}
 	
 	/**
+	 * Builds and returns signature for the given
+	 * ``member`` as a markdown list item.
+	 * 
+	 * @param member Member to build list item from.
+	 * @return Built list item.
+	 */
+	default String getItemSignature(final ExecutableMemberDoc member) {
+		return Markdown.listItem(
+				new StringBuffer()
+					.append(getReturn(member))
+					.append(' ')
+					.append(getLinkedName(member))
+					.toString());
+	}
+	
+	/**
 	 * 
 	 * @param member
 	 * @return
 	 */
-	default String getItemSignature(final ExecutableMemberDoc member) {
-		return new StringBuilder()
-		.append("* ")
-		.append(getReturn(member))
-		.append(' ')
-		.append(getLinkedName(member))
-		.toString();
+	static String getLinkedName(final ExecutableMemberDoc member) {
+		final StringBuffer anchorBuilder = new StringBuffer()
+			.append('#')
+			.append(member.name());
+		final Parameter[] parameters = member.parameters();
+		for (int i = 0; i < parameters.length; i++) {
+			anchorBuilder.append(parameters[i].typeName());
+			if (i < parameters.length - 1) {
+				anchorBuilder.append('-');
+			}
+		}
+		final String url = anchorBuilder.toString().toLowerCase();
+		return Markdown.link(member.name(), url);
 	}
 
 	/**
@@ -183,14 +198,14 @@ public interface IGenerationContext {
 		final String common = StringUtils.getCommonPrefix(source, target);
 		final int start = common.length();
 		final String back = source.substring(start);
-		final StringBuilder builder = new StringBuilder();
+		final StringBuffer pathBuilder = new StringBuffer();
 		for (int i = 0; i < StringUtils.countMatches(back, '.'); i++) {
-			builder.append("../");
+			pathBuilder.append("../");
 		}
-		final String forward = target.substring(start + 1);
-		builder.append(forward.replace('.', '/'));
-		builder.append('/');
-		return builder.toString();
+		final String forward = target.substring(start); // TODO : Checkout index evolution (+1, 0).
+		pathBuilder.append(forward.replace('.', '/'));
+		pathBuilder.append('/');
+		return pathBuilder.toString();
 	}
 	
 }

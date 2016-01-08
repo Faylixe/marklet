@@ -52,7 +52,8 @@ public final class PackagePageBuilder {
 	 */
 	private void buildHeader() {
 		documentBuilder.appendHeader(
-				new StringBuilder(MarkletConstant.PACKAGE)
+				new StringBuffer()
+					.append(MarkletConstant.PACKAGE)
 					.append(packageDoc.name())
 					.toString(),
 				1);

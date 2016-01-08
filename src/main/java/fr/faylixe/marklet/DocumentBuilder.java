@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-import com.sun.javadoc.ConstructorDoc;
 import com.sun.javadoc.ExecutableMemberDoc;
 import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.MethodDoc;
@@ -138,55 +137,49 @@ public final class DocumentBuilder {
 	
 	/**
 	 * 
-	 * @param field
+	 * @param fieldDoc
 	 */
-	public void appendField(final FieldDoc field) {
-		writer.append("| ");
-		writer.append(""); // TODO : Write link type.
-		writer.append(" | ");
-		writer.append(field.name());
-		writer.append(" |");
+	public void appendField(final FieldDoc fieldDoc) {
+		writer.append(fieldDoc.name());
 		newLine();
 	}
 
 	/**
+	 * Appends the method documentation body. Using the
+	 * following format :
 	 * 
-	 * @param constructorDoc
-	 */
-	public void appendConstructor(final ConstructorDoc constructorDoc) {
-		appendSignature(constructorDoc);
-		newLine();
-		final String description = context.getDescription(constructorDoc);
-		writer.append(description);
-		appendParameters(constructorDoc.paramTags());
-		appendsException(constructorDoc.throwsTags());
-		newLine();
-		writer.append(MarkletConstant.HR);
-		newLine();
-	}
-
-	/**
+	 * * method signature (as header)
+	 * * method description (as text)
+	 * * method parameters (as list)
+	 * * method return type (as single item list)
+	 * * method exception (as list)
 	 * 
-	 * @param methodDoc
+	 * @param methodDoc Method documentation to append.
 	 */
-	public void appendMethod(final MethodDoc methodDoc) {
-		appendSignature(methodDoc);
+	public void appendMember(final ExecutableMemberDoc member) {
+		appendSignature(member);
 		newLine();
-		final String description = context.getDescription(methodDoc);
+		final String description = context.getDescription(member);
 		writer.append(description);
-		appendParameters(methodDoc.paramTags());
-		appendReturn(methodDoc.tags("return"));
-		appendsException(methodDoc.throwsTags());
+		appendParameters(member.paramTags());
+		if (member instanceof MethodDoc) {
+			final MethodDoc methodDoc = (MethodDoc) member;
+			appendReturn(methodDoc.tags("return")); // TODO : Exports as static constant.
+		}
+		appendsException(member.throwsTags());
 		newLine();
-		writer.append(MarkletConstant.HR);
+		writer.append(Markdown.HR);
 		newLine();
-		
 	}
 
 	/**
+	 * Appends parameters defined by the
+	 * given list, as a markdown list of
+	 * the following format :
+	 * 
+	 * * ``Type : Description``
 	 * 
 	 * @param parameters
-	 * @throws IOException
 	 */
 	private void appendParameters(final ParamTag[] parameters) {
 		if (parameters.length > 0) {
@@ -194,43 +187,53 @@ public final class DocumentBuilder {
 			appendHeader(MarkletConstant.PARAMETERS, 5);
 			newLine();
 			for (final ParamTag parameter : parameters) {
-				writer.append("* ");
-				writer.append(parameter.parameterName());
-				writer.append(" ");
-				writer.append(parameter.parameterComment());
+				final String parameterItem = new StringBuffer()
+					.append(parameter.parameterName())
+					.append(' ')
+					.append(parameter.parameterComment()) // TODO : Link processing ?
+					.toString();
+				writer.append(Markdown.listItem(parameterItem));
 				newLine();
 			}
 		}
 	}
 	
 	/**
+	 * Appends the description of the return type
+	 * defined by the given ``tag``, as a markdown
+	 * item of the following format :
 	 * 
-	 * @param type
+	 * * ``Type : Description``
+	 * 
+	 * @param tag Return type tag to use.
 	 */
 	private void appendReturn(final Tag[] tag) {
 		if (tag.length > 0) {
 			newLine();
 			appendHeader(MarkletConstant.RETURNS, 5);
 			newLine();
-			writer.append("* ");
-			writer.append(tag[0].text());
+			writer.append(Markdown.listItem(tag[0].text()));  // TODO : Link processing ?
 			newLine();
 		}
 	}
 
 	/**
+	 * Appends the given ``exception`` to the current
+	 * document, as a markdown item of the following format :
 	 * 
-	 * @throws IOException
+	 * * ``Type : Description``
 	 */
 	private void appendsException(final ThrowsTag[] exceptions) {
 		if (exceptions.length > 0) {
 			newLine();
 			appendHeader(MarkletConstant.THROWS, 5);
 			for (final ThrowsTag exception : exceptions) {
-				writer.append("* ");
-				writer.append(context.getClassLink(source, exception.exception())); // TODO : Link to exception class.
-				writer.append(" ");
-				writer.append(exception.exceptionComment());
+				final String exceptionItem = new StringBuffer()
+					.append(context.getClassLink(source, exception.exception()))
+					.append(' ')
+					.append(exception.exceptionComment())  // TODO : Link processing ?
+					.toString();
+				writer.append(Markdown.listItem(exceptionItem));
 				newLine();
 			}
 		}
@@ -244,7 +247,7 @@ public final class DocumentBuilder {
 	 * @throws IOException If any error occurs while closing document.
 	 */
 	public void build(final Path path) throws IOException {
-		writer.append(MarkletConstant.HR);
+		writer.append(Markdown.HR);
 		newLine();
 		writer.append(MarkletConstant.BADGE);
 		final String content = writer.toString();

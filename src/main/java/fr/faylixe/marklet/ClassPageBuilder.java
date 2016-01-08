@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.Doc;
+import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.MethodDoc;
 import com.sun.javadoc.PackageDoc;
 
@@ -74,11 +75,11 @@ public final class ClassPageBuilder {
 
 	/**
 	 * 
-	 * @param method
+	 * @param methodDoc
 	 * @return
 	 */
-	private boolean isInherited(final MethodDoc method) {
-		return method.commentText() != "{@inheritDoc}";
+	private boolean isInherited(final MethodDoc methodDoc) {
+		return methodDoc.commentText() != "{@inheritDoc}";
 	}
 
 	/**
@@ -87,7 +88,7 @@ public final class ClassPageBuilder {
 	 * class inheritance path.
 	 */
 	private String buildHierachy() {
-		final StringBuilder hiearchyBuilder = new StringBuilder();
+		final StringBuffer hiearchyBuilder = new StringBuffer();
 		ClassDoc current = classDoc;
 		while (current != null) {			
 			hiearchyBuilder.insert(0, context.getClassLink(classDoc.containingPackage(), current));
@@ -109,9 +110,10 @@ public final class ClassPageBuilder {
 		documentBuilder.appendHeader(classDoc.name(), 1);
 		final PackageDoc packageDoc = classDoc.containingPackage();
 		final String packageName = packageDoc.name();
-		final String packageHeader = new StringBuilder(MarkletConstant.PACKAGE)
-			.append(MarkdownUtils.buildLink(packageName, MarkletConstant.README))
-			.append("<br>") // TODO : Constant
+		final String packageHeader = new StringBuffer()
+			.append(MarkletConstant.PACKAGE)
+			.append(Markdown.link(packageName, MarkletConstant.README))
+			.append(Markdown.NEWLINE)
 			.toString();
 		documentBuilder.appendText(packageHeader);
 		documentBuilder.appendText(buildHierachy());
@@ -157,6 +159,10 @@ public final class ClassPageBuilder {
 	private void buildFieldSummary() {
 		if (hasField()) {
 			documentBuilder.appendTableHeader(MarkletConstant.FIELDS_SUMMARY_HEADERS);
+//			getOrderedElements(classDoc::fields)
+//				.filter(FieldDoc::isStatic)
+//				//.map(context::getItemSignature)
+//				.forEach(documentBuilder.appendText);
 			documentBuilder.newLine();
 		}
 	}
@@ -196,7 +202,7 @@ public final class ClassPageBuilder {
 		if (hasConstructor()) {
 			documentBuilder.newLine();
 			documentBuilder.appendHeader(MarkletConstant.CONSTRUCTORS, 2);
-			getOrderedElements(classDoc::constructors).forEach(documentBuilder::appendConstructor);
+			getOrderedElements(classDoc::constructors).forEach(documentBuilder::appendMember);
 		}
 	}
 
@@ -207,9 +213,12 @@ public final class ClassPageBuilder {
 		if (hasField()) {
 			documentBuilder.newLine();
 			documentBuilder.appendHeader(MarkletConstant.FIELDS, 2);
-//			documentBuilder.appendTableHeader(MarkletConstant.FIELDS_SUMMARY_HEADERS);
-//			buildFields(getOrderedElements(classDoc::fields).filter(field -> !field.isStatic()));
-//			buildFields(getOrderedElements(classDoc::fields).filter(FieldDoc::isStatic));
+			getOrderedElements(classDoc::fields)
+				.filter(field -> !field.isStatic())
+				.forEach(documentBuilder::appendField);
+			getOrderedElements(classDoc::fields)
+				.filter(FieldDoc::isStatic)
+				.forEach(documentBuilder::appendField);
 		}
 	}
 	
@@ -220,7 +229,7 @@ public final class ClassPageBuilder {
 		if (hasMethod()) {
 			documentBuilder.newLine();
 			documentBuilder.appendHeader(MarkletConstant.METHODS, 2);
-			getOrderedElements(classDoc::methods).forEach(documentBuilder::appendMethod);
+			getOrderedElements(classDoc::methods).forEach(documentBuilder::appendMember);
 		}
 	}
 
@@ -236,9 +245,9 @@ public final class ClassPageBuilder {
 	 */
 	public static void build(final IGenerationContext context, final ClassDoc classDoc, final Path directoryPath) throws IOException {
 		final Path classPath = Paths.get(
-				new StringBuilder()
+				new StringBuffer()
 					.append(classDoc.simpleTypeName())
-					.append(MarkdownUtils.FILE_EXTENSION)
+					.append(Markdown.FILE_EXTENSION)
 					.toString());
 		final DocumentBuilder documentBuilder = new DocumentBuilder(context, classDoc.containingPackage());
 		final ClassPageBuilder builder = new ClassPageBuilder(context, documentBuilder, classDoc);

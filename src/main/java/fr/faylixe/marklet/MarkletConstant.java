@@ -61,9 +61,6 @@ public final class MarkletConstant {
 	/** Markdown sequence for cell separator. **/
 	public static final String TABLE_SEPARATOR = " | ";
 
-	/** Markdown sequence for horizontal rules. **/
-	public static final String HR = "---";
-
 	/**
 	 * Private constructor for avoiding instantiation.
 	 */
