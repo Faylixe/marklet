@@ -51,9 +51,6 @@ public final class MarkletConstant {
 
 	/** Header labels for methods summary. **/
 	public static final String [] METHODS_SUMMARY_HEADERS = {"Type and modifiers", "Method signature"};
-	
-	/** Header labels for fields summary. **/
-	public static final String [] FIELDS_SUMMARY_HEADERS = {"Type", "Name", "Description"};
 
 	/** Marklet link using dynamic badge. **/
 	public static final String BADGE = "[![Marklet](https://img.shields.io/badge/Generated%20by-Marklet-green.svg)](https://github.com/Faylixe/marklet)";

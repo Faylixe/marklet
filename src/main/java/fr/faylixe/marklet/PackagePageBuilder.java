@@ -21,13 +21,7 @@ import com.sun.javadoc.PackageDoc;
  * 
  * @author fv
  */
-public final class PackagePageBuilder {
-
-	/** Generation context used. **/
-	private final IGenerationContext context;
-
-	/** Document builder instance for filling package page content. **/
-	private final DocumentBuilder documentBuilder;
+public final class PackagePageBuilder extends MarkletDocumentBuilder {
 
 	/** Target package that page is built from. **/
 	private final PackageDoc packageDoc;
@@ -35,14 +29,11 @@ public final class PackagePageBuilder {
 	/**
 	 * Default constructor.
 	 * 
-	 * @param context Generation context used.
-	 * @param documentBuilder Document builder instance for filling package page content.
 	 * @param packageDoc Target package that page is built from.
 	 */
-	private PackagePageBuilder(final IGenerationContext context, final DocumentBuilder documentBuilder, final PackageDoc packageDoc) {
-		this.context = context;
+	private PackagePageBuilder(final PackageDoc packageDoc) {
+		super(packageDoc);
 		this.packageDoc = packageDoc;
-		this.documentBuilder = documentBuilder;
 	}
 
 	/**
@@ -51,16 +42,12 @@ public final class PackagePageBuilder {
 	 * description.
 	 */
 	private void buildHeader() {
-		documentBuilder.appendHeader(
-				new StringBuffer()
-					.append(MarkletConstant.PACKAGE)
-					.append(packageDoc.name())
-					.toString(),
-				1);
-		documentBuilder.newLine();
-		final String description = context.getDescription(packageDoc);
-		documentBuilder.appendText(description);
-		documentBuilder.newLine();
+		header(1);
+		text(MarkletConstant.PACKAGE);
+		text(packageDoc.name());
+		newLine();
+		description(packageDoc);
+		newLine();
 	}
 
 	/**
@@ -76,16 +63,26 @@ public final class PackagePageBuilder {
 	private void buildIndex(final String label, final Supplier<ClassDoc[]> classSupplier) {
 		final ClassDoc [] classDocs = classSupplier.get();
 		if (classDocs.length > 0) {
-			documentBuilder.appendHeader(label, 2);
-			documentBuilder.appendTableHeader(MarkletConstant.NAME);
+			header(2);
+			text(label);
+			newLine();
+			tableHeader(MarkletConstant.NAME);
 			Arrays
 				.stream(classDocs)
-				.forEach(classDoc -> {
-					final String classLink = context.getClassLink(packageDoc, classDoc);
-					documentBuilder.appendTableRow(classLink);					
-				});
-			documentBuilder.newLine();
+				.forEach(this::buildClassRow);
+			newLine();
 		}
+	}
+
+	/**
+	 * 
+	 * @param classDoc
+	 */
+	private void buildClassRow(final ClassDoc classDoc) {
+		startTableRow();
+		classLink(packageDoc, classDoc);
+		endTableRow();
+		newLine();
 	}
 
 	/**
@@ -109,18 +106,16 @@ public final class PackagePageBuilder {
 	 * to the given ``packageDoc`` into the directory denoted
 	 * by the given ``directoryPath``.
 	 * 
-	 * @param context Context used.
 	 * @param packageDoc Package to generated documentation for.
 	 * @param directoryPath Path of the directory to write documentation in.
 	 * @throws IOException If any error occurs while writing package page.
 	 */
-	public static void build(final IGenerationContext context, final PackageDoc packageDoc, final Path directoryPath) throws IOException {
-		final DocumentBuilder documentBuilder = new DocumentBuilder(context, packageDoc);
-		final PackagePageBuilder packageBuilder = new PackagePageBuilder(context, documentBuilder, packageDoc);
+	public static void build(final PackageDoc packageDoc, final Path directoryPath) throws IOException {
+		final PackagePageBuilder packageBuilder = new PackagePageBuilder( packageDoc);
 		packageBuilder.buildHeader();
 		packageBuilder.buildIndexes();
 		final Path path = directoryPath.resolve(MarkletConstant.README);
-		documentBuilder.build(path);
+		packageBuilder.build(path);
 	}
 
 }

@@ -17,7 +17,7 @@ import com.sun.javadoc.*;
  * 
  * @author fv
  */
-public final class Marklet implements IGenerationContext {
+public final class Marklet {
 
 	/** Command line options that have been parsed. **/
 	private final MarkletOptions options;
@@ -34,18 +34,6 @@ public final class Marklet implements IGenerationContext {
 	private Marklet(final MarkletOptions options, final RootDoc root) {
 		this.root = root;
 		this.options = options;
-	}
-
-	/** {@inheritDoc} **/
-	@Override
-	public boolean containsClass(final String qualifiedName) {
-		return root.classNamed(qualifiedName) != null;
-	}
-	
-	/** {@inheritDoc} **/
-	@Override
-	public boolean containsPackage(final String qualifiedName) {
-		return root.packageNamed(qualifiedName) != null;
 	}
 
 	/**
@@ -80,7 +68,7 @@ public final class Marklet implements IGenerationContext {
 			if (!Files.exists(directoryPath)) {
 				Files.createDirectories(directoryPath);
 			}
-			PackagePageBuilder.build(this, packageDoc, directoryPath);
+			PackagePageBuilder.build(packageDoc, directoryPath);
 			return directoryPath;
 		}
 		return Paths.get(".");
@@ -115,7 +103,7 @@ public final class Marklet implements IGenerationContext {
 			final String packageName = packageDoc.name();
 			final Path packageDirectory = getPackageDirectory(packageName);
 			root.printNotice("Generates documentation for " + classDoc.name());
-			ClassPageBuilder.build(this, classDoc, packageDirectory);				
+			ClassPageBuilder.build(classDoc, packageDirectory);				
 		}
 	}
 

@@ -3,7 +3,9 @@ package fr.faylixe.marklet;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -22,13 +24,7 @@ import com.sun.javadoc.PackageDoc;
  * 
  * @author fv
  */
-public final class ClassPageBuilder {
-
-	/** Generation context used. **/
-	private final IGenerationContext context;
-
-	/** Document builder instance for filling class page content.  **/
-	private final DocumentBuilder documentBuilder;
+public final class ClassPageBuilder extends MarkletDocumentBuilder {
 
 	/** Target class that page is built from. **/
 	private final ClassDoc classDoc;
@@ -36,14 +32,11 @@ public final class ClassPageBuilder {
 	/**
 	 * Default constructor. 
 	 * 
-	 * @param context Generation context used.
-	 * @param documentBuilder Document builder instance for filling class page content.
 	 * @param classDoc Target class that page is built from.
 	 */
-	private ClassPageBuilder(final IGenerationContext context, final DocumentBuilder documentBuilder, final ClassDoc classDoc) {
-		this.context = context;
+	private ClassPageBuilder(final ClassDoc classDoc) {
+		super(classDoc.containingPackage());
 		this.classDoc = classDoc;
-		this.documentBuilder = documentBuilder;
 	}
 	
 	/**
@@ -79,7 +72,7 @@ public final class ClassPageBuilder {
 	 * @return
 	 */
 	private boolean isInherited(final MethodDoc methodDoc) {
-		return methodDoc.commentText() != "{@inheritDoc}";
+		return !methodDoc.commentText().equals("{@inheritDoc}");
 	}
 
 	/**
@@ -87,18 +80,20 @@ public final class ClassPageBuilder {
 	 * current class. Such hierarchy consists in the
 	 * class inheritance path.
 	 */
-	private String buildHierachy() {
-		final StringBuffer hiearchyBuilder = new StringBuffer();
+	private void buildHierachy() {
+		final List<ClassDoc> hierarchy = new ArrayList<ClassDoc>();
 		ClassDoc current = classDoc;
-		while (current != null) {			
-			hiearchyBuilder.insert(0, context.getClassLink(classDoc.containingPackage(), current));
+		while (current != null) {
+			hierarchy.add(current);
 			current = current.superclass();
-			if (current != null) {
-				hiearchyBuilder.insert(0, " > "); // TODO : Constant
+		}
+		quote();
+		for (int i = hierarchy.size() - 1; i >= 0; i--) {
+			classLink(classDoc.containingPackage(), hierarchy.get(i));
+			if (i > 0) {
+				text(" > ");
 			}
 		}
-		hiearchyBuilder.insert(0, "> "); // TODO : Constant
-		return hiearchyBuilder.toString();
 	}
 
 	/**
@@ -107,19 +102,20 @@ public final class ClassPageBuilder {
 	 * the class hierarchy, and the comment text.
 	 */
 	private void buildHeader() {
-		documentBuilder.appendHeader(classDoc.name(), 1);
+		header(1);
+		text(classDoc.name());
+		newLine();
 		final PackageDoc packageDoc = classDoc.containingPackage();
 		final String packageName = packageDoc.name();
-		final String packageHeader = new StringBuffer()
-			.append(MarkletConstant.PACKAGE)
-			.append(Markdown.link(packageName, MarkletConstant.README))
-			.append(Markdown.NEWLINE)
-			.toString();
-		documentBuilder.appendText(packageHeader);
-		documentBuilder.appendText(buildHierachy());
-		documentBuilder.newLine();
-		final String description = context.getDescription(classDoc);
-		documentBuilder.appendText(description);		
+		text(MarkletConstant.PACKAGE);
+		link(packageName, MarkletConstant.README);
+		breakingReturn();
+		newLine();
+		buildHierachy();
+		newLine();
+		newLine();
+		description(classDoc);
+		newLine();
 	}
 
 	/**
@@ -142,13 +138,14 @@ public final class ClassPageBuilder {
 	 */
 	private void buildMethodsSummary() {
 		if (hasMethod()) {
-			documentBuilder.appendHeader(MarkletConstant.METHODS, 4);
-			documentBuilder.appendTableHeader(MarkletConstant.METHODS_SUMMARY_HEADERS);
+			header(4);
+			text(MarkletConstant.METHODS);
+			newLine();
+			tableHeader(MarkletConstant.METHODS_SUMMARY_HEADERS);
 			getOrderedElements(classDoc::methods)
 				.filter(this::isInherited)
-				.map(context::getRowSignature)
-				.forEach(documentBuilder::appendTableRow);
-			documentBuilder.newLine();
+				.forEach(this::rowSignature);
+			newLine();
 		}
 		// TODO : Build inherited method hierachy here.
 	}
@@ -158,12 +155,16 @@ public final class ClassPageBuilder {
 	 */
 	private void buildFieldSummary() {
 		if (hasField()) {
-			documentBuilder.appendTableHeader(MarkletConstant.FIELDS_SUMMARY_HEADERS);
-//			getOrderedElements(classDoc::fields)
-//				.filter(FieldDoc::isStatic)
-//				//.map(context::getItemSignature)
-//				.forEach(documentBuilder.appendText);
-			documentBuilder.newLine();
+			header(4);
+			text(MarkletConstant.FIELDS);
+			newLine();
+			getOrderedElements(classDoc::fields)
+				.filter(FieldDoc::isStatic)
+				.forEach(this::itemSignature);
+			getOrderedElements(classDoc::fields)
+				.filter(field -> !field.isStatic())
+				.forEach(this::itemSignature);
+			newLine();
 		}
 	}
 
@@ -172,11 +173,12 @@ public final class ClassPageBuilder {
 	 */
 	private void buildConstructorSummary() {
 		if (hasConstructor()) {
-			documentBuilder.appendHeader(MarkletConstant.CONSTRUCTORS, 4);
+			header(4);
+			text(MarkletConstant.CONSTRUCTORS);
+			newLine();
 			getOrderedElements(classDoc::constructors)
-				.map(context::getItemSignature)
-				.forEach(documentBuilder::appendText);;
-			documentBuilder.newLine();
+				.forEach(this::itemSignature);
+			newLine();
 		}
 	}
 
@@ -187,11 +189,15 @@ public final class ClassPageBuilder {
 	 */
 	private void buildSummary() {
 		if (hasField() || hasMethod() || hasConstructor()) {
-			documentBuilder.newLine();
-			documentBuilder.appendHeader(MarkletConstant.SUMMARY, 2);
+			newLine();
+			header(2);
+			text(MarkletConstant.SUMMARY);
+			newLine();
+			buildFieldSummary();
 			buildConstructorSummary();
 			buildMethodsSummary();
-			buildFieldSummary();
+			horizontalRule();
+			newLine();
 		}
 	}
 
@@ -200,9 +206,11 @@ public final class ClassPageBuilder {
 	 */
 	private void buildConstructors() {
 		if (hasConstructor()) {
-			documentBuilder.newLine();
-			documentBuilder.appendHeader(MarkletConstant.CONSTRUCTORS, 2);
-			getOrderedElements(classDoc::constructors).forEach(documentBuilder::appendMember);
+			newLine();
+			header(2);
+			text(MarkletConstant.CONSTRUCTORS);
+			newLine();
+			getOrderedElements(classDoc::constructors).forEach(this::member);
 		}
 	}
 
@@ -211,14 +219,16 @@ public final class ClassPageBuilder {
 	 */
 	private void buildFields() {
 		if (hasField()) {
-			documentBuilder.newLine();
-			documentBuilder.appendHeader(MarkletConstant.FIELDS, 2);
+			newLine();
+			header(2);
+			text(MarkletConstant.FIELDS);
+			newLine();
 			getOrderedElements(classDoc::fields)
 				.filter(field -> !field.isStatic())
-				.forEach(documentBuilder::appendField);
+				.forEach(this::field);
 			getOrderedElements(classDoc::fields)
 				.filter(FieldDoc::isStatic)
-				.forEach(documentBuilder::appendField);
+				.forEach(this::field);
 		}
 	}
 	
@@ -227,9 +237,13 @@ public final class ClassPageBuilder {
 	 */
 	private void buildMethods() {
 		if (hasMethod()) {
-			documentBuilder.newLine();
-			documentBuilder.appendHeader(MarkletConstant.METHODS, 2);
-			getOrderedElements(classDoc::methods).forEach(documentBuilder::appendMember);
+			newLine();
+			header(2);
+			text(MarkletConstant.METHODS);
+			newLine();
+			getOrderedElements(classDoc::methods)
+				.filter(this::isInherited)
+				.forEach(this::member);
 		}
 	}
 
@@ -238,25 +252,23 @@ public final class ClassPageBuilder {
 	 * associated to the given ``classDoc`` into
 	 * the directory denoted by the given ``directoryPath``.
 	 * 
-	 * @param context Context used.
 	 * @param classDoc Class to generated documentation for.
 	 * @param directoryPath Path of the directory to write documentation in.
 	 * @throws IOException If any error occurs while writing documentation.
 	 */
-	public static void build(final IGenerationContext context, final ClassDoc classDoc, final Path directoryPath) throws IOException {
+	public static void build(final ClassDoc classDoc, final Path directoryPath) throws IOException {
 		final Path classPath = Paths.get(
 				new StringBuffer()
 					.append(classDoc.simpleTypeName())
-					.append(Markdown.FILE_EXTENSION)
+					.append(MarkdownDocumentBuilder.FILE_EXTENSION)
 					.toString());
-		final DocumentBuilder documentBuilder = new DocumentBuilder(context, classDoc.containingPackage());
-		final ClassPageBuilder builder = new ClassPageBuilder(context, documentBuilder, classDoc);
+		final ClassPageBuilder builder = new ClassPageBuilder(classDoc);
 		builder.buildHeader();
 		builder.buildSummary();
 		builder.buildConstructors();
 		builder.buildFields();
 		builder.buildMethods();
-		documentBuilder.build(directoryPath.resolve(classPath));
+		builder.build(directoryPath.resolve(classPath));
 	}
 
 }
