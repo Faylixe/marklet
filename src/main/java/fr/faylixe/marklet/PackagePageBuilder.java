@@ -37,11 +37,11 @@ public final class PackagePageBuilder extends MarkletDocumentBuilder {
 	}
 
 	/**
-	 * Builds package header. Which consists in
-	 * the package name, and the package text
-	 * description.
+	 * Appends package header to the current
+	 * document . Which consists in the package
+	 * name, and the package text description.
 	 */
-	private void buildHeader() {
+	private void header() {
 		header(1);
 		text(MarkletConstant.PACKAGE);
 		text(packageDoc.name());
@@ -51,16 +51,15 @@ public final class PackagePageBuilder extends MarkletDocumentBuilder {
 	}
 
 	/**
-	 * Builds a class based index, namely list each
-	 * type in a markdown table. Such type could be
-	 * either class, interface, or enumeration.
-	 * 
-	 * TODO : Add type description snippet.
+	 * Appends a class based index to the current
+	 * document, namely list each type in a markdown
+	 * table. Such type could be either class,
+	 * interface, or enumeration.
 	 * 
 	 * @param label Label of the type categories.
 	 * @param classSupplier Type supplier.
 	 */
-	private void buildIndex(final String label, final Supplier<ClassDoc[]> classSupplier) {
+	private void classIndex(final String label, final Supplier<ClassDoc[]> classSupplier) {
 		final ClassDoc [] classDocs = classSupplier.get();
 		if (classDocs.length > 0) {
 			header(2);
@@ -69,16 +68,18 @@ public final class PackagePageBuilder extends MarkletDocumentBuilder {
 			tableHeader(MarkletConstant.NAME);
 			Arrays
 				.stream(classDocs)
-				.forEach(this::buildClassRow);
+				.forEach(this::classRow);
 			newLine();
 		}
 	}
 
 	/**
+	 * Appends a class link row to the current
+	 * index built in the current document.
 	 * 
-	 * @param classDoc
+	 * @param classDoc Class to append link from.
 	 */
-	private void buildClassRow(final ClassDoc classDoc) {
+	private void classRow(final ClassDoc classDoc) {
 		startTableRow();
 		classLink(packageDoc, classDoc);
 		endTableRow();
@@ -94,11 +95,11 @@ public final class PackagePageBuilder extends MarkletDocumentBuilder {
 	 * * Enumerations
 	 * * Annotations
 	 */
-	private void buildIndexes() {
+	private void indexes() {
 		// TODO : Build annotation index.
-		buildIndex(MarkletConstant.ENUMERATIONS, packageDoc::enums);
-		buildIndex(MarkletConstant.INTERFACES, packageDoc::interfaces);
-		buildIndex(MarkletConstant.CLASSES, packageDoc::allClasses);
+		classIndex(MarkletConstant.ENUMERATIONS, packageDoc::enums);
+		classIndex(MarkletConstant.INTERFACES, packageDoc::interfaces);
+		classIndex(MarkletConstant.CLASSES, packageDoc::allClasses);
 	}
 
 	/**
@@ -112,8 +113,8 @@ public final class PackagePageBuilder extends MarkletDocumentBuilder {
 	 */
 	public static void build(final PackageDoc packageDoc, final Path directoryPath) throws IOException {
 		final PackagePageBuilder packageBuilder = new PackagePageBuilder( packageDoc);
-		packageBuilder.buildHeader();
-		packageBuilder.buildIndexes();
+		packageBuilder.header();
+		packageBuilder.indexes();
 		final Path path = directoryPath.resolve(MarkletConstant.README);
 		packageBuilder.build(path);
 	}

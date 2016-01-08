@@ -26,6 +26,9 @@ import com.sun.javadoc.PackageDoc;
  */
 public final class ClassPageBuilder extends MarkletDocumentBuilder {
 
+	/** Separator used in the class hierarchy.**/
+	private static final String HIERARCHY_SEPARATOR = " > ";
+
 	/** Target class that page is built from. **/
 	private final ClassDoc classDoc;
 
@@ -76,11 +79,11 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 	}
 
 	/**
-	 * Builds and write a class hierarchy from the
-	 * current class. Such hierarchy consists in the
+	 * Appends to the current document the class hierarchy
+	 * from the current class. Such hierarchy consists in the
 	 * class inheritance path.
 	 */
-	private void buildHierachy() {
+	private void hierachy() {
 		final List<ClassDoc> hierarchy = new ArrayList<ClassDoc>();
 		ClassDoc current = classDoc;
 		while (current != null) {
@@ -91,17 +94,18 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 		for (int i = hierarchy.size() - 1; i >= 0; i--) {
 			classLink(classDoc.containingPackage(), hierarchy.get(i));
 			if (i > 0) {
-				text(" > ");
+				text(HIERARCHY_SEPARATOR);
 			}
 		}
 	}
 
 	/**
-	 * Builds and writes the documentation header.
-	 * Consists in the class name with a H1 level,
-	 * the class hierarchy, and the comment text.
+	 * Appends to the current document the class
+	 * header. Consists in the class name with a
+	 * level 1 header, the class hierarchy, and
+	 * the comment text.
 	 */
-	private void buildHeader() {
+	private void header() {
 		header(1);
 		text(classDoc.name());
 		newLine();
@@ -111,7 +115,7 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 		link(packageName, MarkletConstant.README);
 		breakingReturn();
 		newLine();
-		buildHierachy();
+		hierachy();
 		newLine();
 		newLine();
 		description(classDoc);
@@ -134,9 +138,10 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 	}
 
 	/**
-	 * Builds the summary for all exposed methods if any.
+	 * Appends to the current document the
+	 * method summary if any method is exposed.
 	 */
-	private void buildMethodsSummary() {
+	private void methodsSummary() {
 		if (hasMethod()) {
 			header(4);
 			text(MarkletConstant.METHODS);
@@ -147,13 +152,14 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 				.forEach(this::rowSignature);
 			newLine();
 		}
-		// TODO : Build inherited method hierachy here.
+		// TODO : Build inherited method hierarchy here.
 	}
 	
 	/**
-	 * Builds the summary for all exposed fields if any.
+	 * Appends to the current document the
+	 * field summary if any field is exposed.
 	 */
-	private void buildFieldSummary() {
+	private void fieldsSummary() {
 		if (hasField()) {
 			header(4);
 			text(MarkletConstant.FIELDS);
@@ -169,9 +175,11 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 	}
 
 	/**
-	 * Builds the summary for all exposed constructors if any.
+	 * Appends to the current document the
+	 * constructor summary if any constructor
+	 * is exposed.
 	 */
-	private void buildConstructorSummary() {
+	private void constructorsSummary() {
 		if (hasConstructor()) {
 			header(4);
 			text(MarkletConstant.CONSTRUCTORS);
@@ -183,28 +191,29 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 	}
 
 	/**
-	 * Builds class summary. Consists in an overview of
-	 * available constructor, method, and field, in a
-	 * table form.
+	 * Appends to the current document the class
+	 * summary. Consists in an overview of available
+	 * constructor, method, and field, in a table form.
 	 */
-	private void buildSummary() {
+	private void summary() {
 		if (hasField() || hasMethod() || hasConstructor()) {
 			newLine();
 			header(2);
 			text(MarkletConstant.SUMMARY);
 			newLine();
-			buildFieldSummary();
-			buildConstructorSummary();
-			buildMethodsSummary();
+			fieldsSummary();
+			constructorsSummary();
+			methodsSummary();
 			horizontalRule();
 			newLine();
 		}
 	}
 
 	/**
-	 * Builds constructors documentation.
+	 * Appends to the current document detail
+	 * about target class constructors.
 	 */
-	private void buildConstructors() {
+	private void constructors() {
 		if (hasConstructor()) {
 			newLine();
 			header(2);
@@ -215,9 +224,10 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 	}
 
 	/**
-	 * Builds fields documentation.
+	 * Appends to the current document detail
+	 * about target class fields.
 	 */
-	private void buildFields() {
+	private void fields() {
 		if (hasField()) {
 			newLine();
 			header(2);
@@ -233,9 +243,10 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 	}
 	
 	/**
-	 * Builds methods documentation.
+	 * Appends to the current document detail
+	 * about target class methods.
 	 */
-	private void buildMethods() {
+	private void methods() {
 		if (hasMethod()) {
 			newLine();
 			header(2);
@@ -263,11 +274,11 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 					.append(MarkdownDocumentBuilder.FILE_EXTENSION)
 					.toString());
 		final ClassPageBuilder builder = new ClassPageBuilder(classDoc);
-		builder.buildHeader();
-		builder.buildSummary();
-		builder.buildConstructors();
-		builder.buildFields();
-		builder.buildMethods();
+		builder.header();
+		builder.summary();
+		builder.constructors();
+		builder.fields();
+		builder.methods();
 		builder.build(directoryPath.resolve(classPath));
 	}
 

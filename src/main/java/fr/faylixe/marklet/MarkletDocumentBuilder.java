@@ -24,10 +24,23 @@ import com.sun.javadoc.ThrowsTag;
 import com.sun.javadoc.Type;
 
 /**
+ * Custom {@link MarkdownDocumentBuilder} implementation
+ * that aims to be used for building Marklet generated
+ * document. Such document are defined by a source package
+ * from which link are built.
  * 
  * @author fv
  */
 public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
+
+	/** Identifier of the return tag. **/
+	private static final String RETURN_TAG = "return";
+
+	/** Directory separator used for building a *up to parent* directory path. **/
+	private static final String UP_DIRECTORY = "../";
+
+	/** Separator used between parameter name and description. **/
+	private static final String PARAMETER_DETAIL_SEPARATOR = " : ";
 
 	/** Target source package from which document will be written. **/
 	private final PackageDoc source;
@@ -42,7 +55,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	}
 
 	/**
-	 * Creates and returns a valid markdown link
+	 * Appends to the current document a valid markdown link
 	 * that aims to be the shortest one, by using the
 	 * {@link #getPath(String, String)} method. The
 	 * built URL will start from the given ``source``
@@ -63,16 +76,17 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 		}
 		else {
 			// TODO : Process external link here.
+			// TODO : Use marklet-directory project when done.
 			italic(target.qualifiedName());
 		}
 	}
 	
 	/**
-	 * Creates and returns a valid markdown link
-	 * for the given ``type``. If this ``type``
+	 * Appends to the current document a valid markdown
+	 * link for the given ``type``. If this ``type``
 	 * is a primitive one, then only a bold label
 	 * is produced. Otherwise it return a link
-	 * created by the {@link #getClassLink(PackageDoc, ClassDoc)}
+	 * created by the {@link #classLink(PackageDoc, ClassDoc)}
 	 * method.
 	 * 
 	 * @param source Source package to start URL from.
@@ -93,9 +107,10 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	 * comment text, by replacing each link tags
 	 * by effective markdown link.
 	 * 
-	 * @param doc Documentation element to process descrption from.
+	 * @param doc Documentation element to process description from.
 	 * @return Processed documentation text.
 	 */
+	// TODO : Consider using raw text directly ?
 	public void description(final Doc doc) {
 		for (final SeeTag tag : doc.seeTags()) {
 			tag.referencedClass(); // TODO : Build markdown link here.
@@ -104,27 +119,30 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	}
 
 	/**
-	 * Builds and returns ``member`` returns label,
-	 * which is composed of the given ``member``
-	 * modifiers if any, followed by the return 
-	 * type link, if the given ``member`` is a method, 
+	 * Appends to the current document the ``member``
+	 * returns label, which is composed of the given
+	 * ``member`` modifiers if any, followed by the
+	 * return type link, if the given ``member`` is
+	 * a method, 
 	 * 
 	 * @param element Member to build return label for.
-	 * @return Built label.
 	 */
 	public void returnSignature(final ProgramElementDoc element) {
 		bold(element.modifiers());
 		if (element.isMethod()) {
 			final MethodDoc method = (MethodDoc) element;
-			text(" ");
+			character(' ');
 			typeLink(method.containingPackage(), method.returnType());
 		}
 	}
 	
 	/**
+	 * Appends to the current document a link that is
+	 * built from the given ``element``. Such links is
+	 * usually leading to the internal corresponding
+	 * document section
 	 * 
-	 * @param element
-	 * @return
+	 * @param element Element to build link from.
 	 */
 	public void linkedName(final ProgramElementDoc element) {
 		final StringBuffer anchorBuilder = new StringBuffer()
@@ -145,39 +163,43 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	}
 
 	/**
+	 * Appends to the current document the given
+	 * ``parameters`` in an inline list, separated
+	 * by comma.
 	 * 
-	 * @param parameters
+	 * @param parameters Parameters to append inline.
 	 */
 	private void inlineParameters(final Parameter[] parameters) {
-		text("(");
+		character('(');
 		for (int i = 0; i < parameters.length; i++) {
-			System.out.println("Parameter type : " + parameters[i].typeName());
 			typeLink(source, parameters[i].type());
-			text(" ");
+			character(' ');
 			text(parameters[i].name());
 			if (i < parameters.length - 1) {
-				text(", ");
+				character(',');
+				character(' ');
 			}
 		}
-		text(")");
+		character(')');
 	}
 
 	/**
+	 * Appends to the current document the signature
+	 * of the given ``member`` as a level 4 header.
 	 * 
-	 * @param member
+	 * @param member Member to write signature from.
 	 */
 	private void headerSignature(final ExecutableMemberDoc member) {
-		final String signature = new StringBuffer()
-			.append(member.name())
-			.append(member.flatSignature())
-			.toString();
 		header(4);
-		text(signature);
+		text(member.name());
+		text(member.flatSignature());
 	}
 
 	/**
+	 * Appends to the current document the signature
+	 * of the given ``member`` as a table row.
 	 * 
-	 * @param member
+	 * @param member Member to write signature from.
 	 */
 	public void rowSignature(final ProgramElementDoc element) {
 		startTableRow();
@@ -193,16 +215,15 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	}
 
 	/**
-	 * Builds and returns signature for the given
-	 * ``member`` as a markdown list item.
+	 * Appends to the current document the signature
+	 * of the given ``member`` as a list item.
 	 * 
-	 * @param element Member to build list item from.
-	 * @return Built list item.
+	 * @param member Member to write signature from.
 	 */
 	public void itemSignature(final ProgramElementDoc element) {
 		item();
 		returnSignature(element);
-		text(" ");
+		character(' ');
 		linkedName(element);
 		if (element instanceof ExecutableMemberDoc) {
 			final ExecutableMemberDoc member = (ExecutableMemberDoc) element;
@@ -212,8 +233,15 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	}
 
 	/**
+	 * Appends to the current document the detail
+	 * about the given ``fieldDoc``. Using the
+	 * following format :
 	 * 
-	 * @param fieldDoc
+	 * * Field name (as header)
+	 * * Field signature (as quoted text)
+	 * * Field description (as quoted text)
+	 * 
+	 * @param fieldDoc Field documentation to append.
 	 */
 	public void field(final FieldDoc fieldDoc) {
 		header(4);
@@ -221,7 +249,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 		newLine();
 		quote();
 		bold(fieldDoc.modifiers());
-		text(" ");
+		character(' ');
 		typeLink(source, fieldDoc.type());
 		newLine();
 		newLine();
@@ -249,16 +277,13 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 		headerSignature(member);
 		newLine();
 		quote();
-		if (!member.isIncluded()) {
-			italic("Default inherited constructor");
-		}
 		description(member);
 		newLine();
 		newLine();
 		parameters(member.paramTags());
 		if (member.isMethod()) {
 			final MethodDoc methodDoc = (MethodDoc) member;
-			returnType(methodDoc.tags("return")); // TODO : Exports as static constant.
+			returnType(methodDoc.tags(RETURN_TAG));
 		}
 		exceptions(member.throwsTags());
 		newLine();
@@ -273,7 +298,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	 * 
 	 * * ``Type : Description``
 	 * 
-	 * @param parameters
+	 * @param parameters Parameter documentation to append.
 	 */
 	private void parameters(final ParamTag[] parameters) {
 		if (parameters.length > 0) {
@@ -284,7 +309,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 				item();
 				// TODO : Think about including parameter Type here.
 				text(parameter.parameterName());
-				text(" : ");
+				text(PARAMETER_DETAIL_SEPARATOR);
 				text(parameter.parameterComment());
 				newLine();
 			}
@@ -307,7 +332,8 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 			bold(MarkletConstant.RETURNS);
 			newLine();
 			item();
-			text(tag[0].text());  // TODO : Link processing ?
+			 // TODO : Link processing ?
+			text(tag[0].text());
 			newLine();
 			newLine();
 		}
@@ -327,7 +353,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 			for (final ThrowsTag exception : exceptions) {
 				item();
 				classLink(source, exception.exception());
-				text(" ");
+				character(' ');
 				text(exception.exceptionComment());
 				newLine();
 			}
@@ -373,10 +399,10 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 		if (!common.equals(source)) {
 			final String back = source.substring(start);
 			for (int i = 0; i < StringUtils.countMatches(back, '.'); i++) {
-				pathBuilder.append("../");
+				pathBuilder.append(UP_DIRECTORY);
 			}
 		}
-		final String forward = (start >= 0 ? target.substring(start + 1) : target); // TODO : Checkout index evolution (+1, 0).
+		final String forward = (start >= 0 ? target.substring(start + 1) : target);
 		pathBuilder.append(forward.replace('.', '/'));
 		pathBuilder.append('/');
 		return pathBuilder.toString();
