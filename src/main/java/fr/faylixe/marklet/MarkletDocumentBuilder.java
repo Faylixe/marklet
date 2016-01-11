@@ -414,15 +414,21 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 		final StringBuffer pathBuilder = new StringBuffer();
 		final String common = StringUtils.getCommonPrefix(source, target);
 		final int start = common.length();
+		final boolean endsWithDot = common.endsWith(".");
 		if (!common.equals(source)) {
+			if (endsWithDot) {
+				pathBuilder.append(UP_DIRECTORY);
+			}
 			final String back = source.substring(start);
 			for (int i = 0; i < StringUtils.countMatches(back, '.'); i++) {
 				pathBuilder.append(UP_DIRECTORY);
 			}
 		}
-		final String forward = (start >= 0 ? target.substring(start + 1) : target);
-		pathBuilder.append(forward.replace('.', '/'));
-		pathBuilder.append('/');
+		if (!common.equals(target)) {
+			final String forward = target.substring(endsWithDot ? start : start + 1);
+			pathBuilder.append(forward.replace('.', '/'));
+			pathBuilder.append('/');
+		}
 		return pathBuilder.toString();
 	}
 
