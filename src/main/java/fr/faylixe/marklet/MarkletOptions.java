@@ -48,9 +48,10 @@ public final class MarkletOptions {
 	}
 
 	/**
+	 * Static factory.
 	 * 
-	 * @param options
-	 * @return
+	 * @param rawOptions Raw options array to parse.
+	 * @return Built options instance.
 	 */
 	public static MarkletOptions parse(final String [][] rawOptions) {
 		final MarkletOptions options = new MarkletOptions();

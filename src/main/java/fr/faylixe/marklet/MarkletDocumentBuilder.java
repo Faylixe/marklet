@@ -110,15 +110,6 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 			classLink(source, classDoc);
 		}
 	}
-	
-	/**
-	 * 
-	 * @param source
-	 * @param method
-	 */
-	public void methodLink(final PackageDoc source, final MethodDoc method) {
-		// TODO : Add method linking method here.
-	}
 
 	/**
 	 * This methods will process the given ``doc``
@@ -126,7 +117,6 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	 * by effective markdown link.
 	 * 
 	 * @param doc Documentation element to process description from.
-	 * @return Processed documentation text.
 	 */
 	// TODO : Consider using raw text directly ?
 	public void description(final Doc doc) {
@@ -217,7 +207,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	 * Appends to the current document the signature
 	 * of the given ``member`` as a table row.
 	 * 
-	 * @param member Member to write signature from.
+	 * @param element Member to write signature from.
 	 */
 	public void rowSignature(final ProgramElementDoc element) {
 		startTableRow();
@@ -236,7 +226,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	 * Appends to the current document the signature
 	 * of the given ``member`` as a list item.
 	 * 
-	 * @param member Member to write signature from.
+	 * @param element Member to write signature from.
 	 */
 	public void itemSignature(final ProgramElementDoc element) {
 		item();
@@ -289,7 +279,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	 * * method return type (as single item list)
 	 * * method exception (as list)
 	 * 
-	 * @param methodDoc Method documentation to append.
+	 * @param member Method documentation to append.
 	 */
 	public void member(final ExecutableMemberDoc member) {
 		headerSignature(member);
@@ -384,6 +374,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	 * horizontal rule, the **marklet** generation
 	 * badge, and closing the internal writer.
 	 * 
+	 * @param path Path of the document to write.
 	 * @throws IOException If any error occurs while closing document.
 	 */
 	public void build(final Path path) throws IOException {

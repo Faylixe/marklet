@@ -7,8 +7,22 @@
 * [Marklet](https://github.com/Faylixe/market/tree/master/javadoc/fr/faylixe/marklet)
 * [Google Code Jam API](https://github.com/Faylixe/googlecodejam-client/tree/master/javadoc/fr/faylixe/googlecodejam/client)
 
-# Usage
+In order to use it with Maven, adds the following configuration for the ``maven-javadoc-plugin``
+in your project ``POM`` :
 
-## Using Maven
-
-## Using Eclipse
+```xml
+<plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-javadoc-plugin</artifactId>
+	<version>2.9</version>
+	<configuration>
+		<doclet>fr.faylixe.marklet.Marklet</doclet>
+		<docletArtifact>
+			<groupId>fr.faylixe</groupId>
+			<artifactId>marklet</artifactId>
+			<version>1.0.0</version>
+		</docletArtifact>
+		<useStandardDocletOptions>false</useStandardDocletOptions>
+	</configuration>
+</plugin>
+```
