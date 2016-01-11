@@ -26,3 +26,11 @@ in your project ``POM`` :
 	</configuration>
 </plugin>
 ```
+
+##Current issues
+
+The current version is a pre release with the following feature missing :
+
+* Javadoc parameters processing.
+* Link tag are not handled yet.
+* Interfaces, inner classes, enumerations, and annotations has not been tested already and subject to bug.
