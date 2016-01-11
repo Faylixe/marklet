@@ -1,5 +1,7 @@
 # Marklet
 
+[![Join the chat at https://gitter.im/Faylixe/marklet](https://badges.gitter.im/Faylixe/marklet.svg)](https://gitter.im/Faylixe/marklet?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Build Status](https://travis-ci.org/Faylixe/marklet.svg)](https://travis-ci.org/Faylixe/marklet)
 
 **Marklet** is a custom Java Doclet which aims to generate a Javadoc in a markdown format which is ready to use in GitHub. You can check a **Marklet** generated javadoc on the following project :
