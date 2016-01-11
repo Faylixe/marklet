@@ -1,6 +1,6 @@
 # Marklet
 
-[![Build Status](https://travis-ci.org/Faylixe/marklet.svg)](https://travis-ci.org/Faylixe/marklet)
+[![Build Status](https://travis-ci.org/Faylixe/marklet.svg)](https://travis-ci.org/Faylixe/marklet) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/fr.faylixe/marklet/badge.svg)](https://maven-badges.herokuapp.com/maven-central/fr.faylixe/marklet)
 
 **Marklet** is a custom Java Doclet which aims to generate a Javadoc in a markdown format which is ready to use in GitHub. You can check a **Marklet** generated javadoc on the following project :
 
