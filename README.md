@@ -1,6 +1,6 @@
 # Marklet
 
-[![Build Status](https://travis-ci.org/Faylixe/marklet.svg)](https://travis-ci.org/Faylixe/marklet) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/fr.faylixe/marklet/badge.svg)](https://maven-badges.herokuapp.com/maven-central/fr.faylixe/marklet)
+[![Build Status](https://travis-ci.org/Faylixe/marklet.svg)](https://travis-ci.org/Faylixe/marklet) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/fr.faylixe/marklet/badge.svg)](https://maven-badges.herokuapp.com/maven-central/fr.faylixe/marklet) [![Join the chat at https://gitter.im/Faylixe/marklet](https://badges.gitter.im/Faylixe/marklet.svg)](https://gitter.im/Faylixe/marklet?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 **Marklet** is a custom Java Doclet which aims to generate a Javadoc in a markdown format which is ready to use in GitHub. You can check a **Marklet** generated javadoc on the following project :
 
@@ -33,3 +33,5 @@ The current version is a pre release with the following feature missing :
 * Javadoc parameters processing.
 * Link tag are not handled yet.
 * Interfaces, inner classes, enumerations, and annotations has not been tested already and subject to bug.
+
+If you do notice any other error, do not hesitate to submit pull request, or indicates it to the Gitter channel.
