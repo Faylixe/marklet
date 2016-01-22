@@ -19,18 +19,22 @@ in your project ``POM`` :
 		<docletArtifact>
 			<groupId>fr.faylixe</groupId>
 			<artifactId>marklet</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.2</version>
 		</docletArtifact>
+		<reportOutputDirectory>./</reportOutputDirectory>
+		<destDir>./</destDir>
+		<additionalparam>-d javadoc/</additionalparam>
 		<useStandardDocletOptions>false</useStandardDocletOptions>
 	</configuration>
 </plugin>
 ```
 
+This will generate the javadoc report into the project directory under subfolder ``javadoc/``.
+
 ##Current issues
 
 The current version is a pre release with the following feature missing :
 
-* Javadoc parameters processing.
 * Link tag are not handled yet.
 * Interfaces, inner classes, enumerations, and annotations has not been tested already and subject to bug.
 

@@ -114,6 +114,7 @@ public final class Marklet {
 	private boolean start() {
 		try {
 			final Path outputDirectory = Paths.get(options.getOutputDirectory());
+			System.out.println("Target output directory : " + outputDirectory.toAbsolutePath().toString());
 			if (!Files.exists(outputDirectory)) {
 				Files.createDirectories(outputDirectory);
 			}
@@ -125,6 +126,25 @@ public final class Marklet {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * 
+	 * @param option
+	 * @return
+	 */
+	public static int optionLength(final String option) {
+		return MarkletOptions.optionLength(option);
+	}
+
+	/**
+	 * 
+	 * @param options
+	 * @param reporter
+	 * @return
+	 */
+	public static boolean validOptions(final String options[][], final DocErrorReporter reporter) {
+		return MarkletOptions.validOptions(options, reporter);
 	}
 
 	/**
