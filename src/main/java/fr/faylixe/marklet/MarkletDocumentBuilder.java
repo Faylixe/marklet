@@ -17,11 +17,14 @@ import com.sun.javadoc.MethodDoc;
 import com.sun.javadoc.PackageDoc;
 import com.sun.javadoc.ParamTag;
 import com.sun.javadoc.Parameter;
+import com.sun.javadoc.ParameterizedType;
 import com.sun.javadoc.ProgramElementDoc;
 import com.sun.javadoc.SeeTag;
 import com.sun.javadoc.Tag;
 import com.sun.javadoc.ThrowsTag;
 import com.sun.javadoc.Type;
+import com.sun.javadoc.TypeVariable;
+import com.sun.javadoc.WildcardType;
 
 /**
  * Custom {@link MarkdownDocumentBuilder} implementation
@@ -108,10 +111,68 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 		else {
 			final ClassDoc classDoc = type.asClassDoc();
 			classLink(source, classDoc);
+			parameterLinks(source, type);
 		}
 	}
 	
 	/**
+	 * Appends to the current document the list of parameters
+	 * from the given ``type`` if any.
+	 * 
+	 * @param source Source package to start URL from.
+	 * @param type Target type to append parameters from.
+	 */
+	private void parameterLinks(final PackageDoc source, final Type type) {
+		final ParameterizedType invocation = type.asParameterizedType();
+		if (invocation != null) {
+			final Type [] types = invocation.typeArguments();
+			if (types.length > 0) {
+				character('<');
+				for (int i = 0; i < types.length; i++) {
+					parameterLink(source, types[i]);
+					if (i < types.length - 1) {
+						text(", ");
+					}
+				}
+				character('>');
+			}
+		}
+	}
+	
+	/**
+	 * Appends to the current document the given type parameter
+	 * as a valid markdown link.
+	 * 
+	 * @param source Source package to start URL from.
+	 * @param type Target type parameter to reach from this package.
+	 */
+	private void parameterLink(final PackageDoc source, final Type type) {
+		final WildcardType wildcard = type.asWildcardType();
+		if (wildcard != null) {
+			character('?');
+		}
+		else {
+			final TypeVariable variableType = type.asTypeVariable();
+			if (variableType != null) {
+				final Type [] bounds = variableType.bounds();
+				if (bounds.length > 0) {
+					text("? extends ");
+					for (int i = 0; i < bounds.length; i++) {
+						typeLink(source, bounds[i]);
+						if (i < bounds.length - 1) {
+							text(" & ");
+						}
+					}
+				}
+			}
+			else {
+				typeLink(source, type);
+			}
+		}
+	}
+	
+	/**
+	 * To document.
 	 * 
 	 * @param source
 	 * @param method
