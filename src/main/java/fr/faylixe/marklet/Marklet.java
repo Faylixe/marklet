@@ -146,6 +146,14 @@ public final class Marklet {
 	public static boolean validOptions(final String options[][], final DocErrorReporter reporter) {
 		return MarkletOptions.validOptions(options, reporter);
 	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public static LanguageVersion languageVersion() {
+		return LanguageVersion.JAVA_1_5;
+	}
 
 	/**
 	 * **Doclet** entry point. Parses user provided options
