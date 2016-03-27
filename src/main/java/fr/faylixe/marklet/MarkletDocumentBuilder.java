@@ -187,7 +187,6 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	 * by effective markdown link.
 	 * 
 	 * @param doc Documentation element to process description from.
-	 * @return Processed documentation text.
 	 */
 	// TODO : Consider using raw text directly ?
 	public void description(final Doc doc) {
@@ -278,7 +277,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	 * Appends to the current document the signature
 	 * of the given ``member`` as a table row.
 	 * 
-	 * @param member Member to write signature from.
+	 * @param element Member to write signature from.
 	 */
 	public void rowSignature(final ProgramElementDoc element) {
 		startTableRow();
@@ -297,7 +296,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	 * Appends to the current document the signature
 	 * of the given ``member`` as a list item.
 	 * 
-	 * @param member Member to write signature from.
+	 * @param element Member to write signature from.
 	 */
 	public void itemSignature(final ProgramElementDoc element) {
 		item();
@@ -350,7 +349,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	 * * method return type (as single item list)
 	 * * method exception (as list)
 	 * 
-	 * @param methodDoc Method documentation to append.
+	 * @param member Method documentation to append.
 	 */
 	public void member(final ExecutableMemberDoc member) {
 		headerSignature(member);
@@ -445,6 +444,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	 * horizontal rule, the **marklet** generation
 	 * badge, and closing the internal writer.
 	 * 
+	 * @param path Path of the document to write.
 	 * @throws IOException If any error occurs while closing document.
 	 */
 	public void build(final Path path) throws IOException {
@@ -475,15 +475,21 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 		final StringBuffer pathBuilder = new StringBuffer();
 		final String common = StringUtils.getCommonPrefix(source, target);
 		final int start = common.length();
+		final boolean endsWithDot = common.endsWith(".");
 		if (!common.equals(source)) {
+			if (endsWithDot) {
+				pathBuilder.append(UP_DIRECTORY);
+			}
 			final String back = source.substring(start);
 			for (int i = 0; i < StringUtils.countMatches(back, '.'); i++) {
 				pathBuilder.append(UP_DIRECTORY);
 			}
 		}
-		final String forward = (start >= 0 ? target.substring(start + 1) : target);
-		pathBuilder.append(forward.replace('.', '/'));
-		pathBuilder.append('/');
+		if (!common.equals(target)) {
+			final String forward = target.substring(endsWithDot ? start : start + 1);
+			pathBuilder.append(forward.replace('.', '/'));
+			pathBuilder.append('/');
+		}
 		return pathBuilder.toString();
 	}
 

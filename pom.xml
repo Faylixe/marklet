@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>fr.faylixe</groupId>
 	<artifactId>marklet</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.2</version>
 	<name>Marklet</name>
 	<description>Marklet is a custom Java Doclet which aims to generate a Javadoc in a markdown format which is ready to use in GitHub.</description>
 	<url>https://github.com/Faylixe/marklet</url>
@@ -119,11 +119,6 @@
 	</profiles>
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-			</resource>
-		</resources>
 	</build>
 	<dependencies>
 		<dependency>
