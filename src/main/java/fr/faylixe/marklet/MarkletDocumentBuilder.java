@@ -190,10 +190,22 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	 */
 	// TODO : Consider using raw text directly ?
 	public void description(final Doc doc) {
-		for (final SeeTag tag : doc.seeTags()) {
-			tag.referencedClass(); // TODO : Build markdown link here.
+		for (final Tag tag : doc.inlineTags()) {
+			if (("Text").equals(tag.name())) {
+				text(tag.text());
+			}
+			else if (("@link").equals(tag.name())) {
+				final SeeTag seeTag = (SeeTag) tag;
+				final ClassDoc classDoc = seeTag.referencedClass();
+				if (classDoc != null) {
+					classLink(source, classDoc);
+				}
+				else {
+					text(tag.text());
+				}
+			}
 		}
-		text(doc.commentText());
+		//text(doc.commentText());
 	}
 
 	/**
