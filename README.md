@@ -19,7 +19,7 @@ in your project ``POM`` :
 		<docletArtifact>
 			<groupId>fr.faylixe</groupId>
 			<artifactId>marklet</artifactId>
-			<version>1.0.2</version>
+			<version>1.0.3</version>
 		</docletArtifact>
 		<reportOutputDirectory>./</reportOutputDirectory>
 		<destDir>./</destDir>
