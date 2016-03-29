@@ -193,11 +193,11 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	}
 
 	/**
-	 * This methods will process the given ``doc``
+	 * This methods will process the given ``inlineTags``
 	 * comment text, by replacing each link tags
 	 * by effective markdown link.
 	 * 
-	 * @param doc Documentation element to process description from.
+	 * @param inlineTags Inline tags to generate description from.
 	 */
 	public void description(final Tag [] inlineTags) {
 		for (final Tag tag : inlineTags) {
