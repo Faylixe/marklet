@@ -181,12 +181,13 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 			header(4);
 			text(MarkletConstant.FIELDS);
 			newLine();
+			tableHeader(MarkletConstant.FIELDS_SUMMARY_HEADERS);
 			getOrderedElements(classDoc::fields)
 				.filter(FieldDoc::isStatic)
-				.forEach(this::itemSignature);
+				.forEach(this::rowSignature);
 			getOrderedElements(classDoc::fields)
 				.filter(field -> !field.isStatic())
-				.forEach(this::itemSignature);
+				.forEach(this::rowSignature);
 			newLine();
 		}
 	}

@@ -40,6 +40,12 @@ public class MarkdownDocumentBuilder {
 	/** Table row end suffix. **/
 	private static final String ROW_END = " |";
 
+	/** **/
+	private static final String LINK_OPEN = "<a href=";
+
+	/** **/
+	private static final String LINK_CLOSE =  "</a>";
+
 	/** Buffer in which markdown document is stored. **/
 	private final StringBuffer buffer;
 
@@ -146,6 +152,26 @@ public class MarkdownDocumentBuilder {
 		for (int i = 0; i < level; i++) {
 			buffer.append('#');
 		}
+	}
+
+	/**
+	 * Appends a raw HTML link to the current document
+	 * using the given ``label`` and the given
+	 * ``url``.
+	 * 
+	 * @param label Label of the built link.
+	 * @param url Target URL of the built link.
+	 */
+	public void rawLink(final String label, final String url) {
+		buffer
+			.append(LINK_OPEN)
+			.append('"')
+			.append(url)
+			.append('"')
+			.append('>')
+			.append(' ')
+			.append(label)
+			.append(LINK_CLOSE);
 	}
 
 	/**

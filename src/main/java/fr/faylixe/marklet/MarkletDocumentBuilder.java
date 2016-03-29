@@ -84,7 +84,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 				.append(path)
 				.append(target.simpleTypeName())
 				.append(MarkdownDocumentBuilder.FILE_EXTENSION);
-			link(target.simpleTypeName(), urlBuilder.toString());
+			rawLink(target.simpleTypeName(), urlBuilder.toString());
 		}
 		else {
 			// TODO : Process external link here.
@@ -92,7 +92,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 			italic(target.qualifiedName());
 		}
 	}
-	
+
 	/**
 	 * Appends to the current document a valid markdown
 	 * link for the given ``type``. If this ``type``
