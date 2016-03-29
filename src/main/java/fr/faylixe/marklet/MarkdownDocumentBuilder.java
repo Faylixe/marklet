@@ -40,11 +40,17 @@ public class MarkdownDocumentBuilder {
 	/** Table row end suffix. **/
 	private static final String ROW_END = " |";
 
-	/** **/
+	/** HTML link opening tag. **/
 	private static final String LINK_OPEN = "<a href=";
 
-	/** **/
+	/** HTML link closing tag. **/
 	private static final String LINK_CLOSE =  "</a>";
+
+	/** HTML paragraph opening tag. **/
+	private static final String PARAGRAPH_OPEN = "<p>";
+
+	/** HTML paragraph closing tag. **/
+	private static final String PARAGRAPH_CLOSE = "</p>";
 
 	/** Buffer in which markdown document is stored. **/
 	private final StringBuffer buffer;
@@ -58,9 +64,22 @@ public class MarkdownDocumentBuilder {
 	}
 	
 	/**
+	 * Filters and returns the given ``text``
+	 * freed from HTML paragraph.
+	 * 
+	 * @param text Text to remove paragraph tag from.
+	 * @return Filtered text.
+	 */
+	private final String filterParagraph(final String text) {
+		return text
+				.replaceAll(PARAGRAPH_OPEN, "")
+				.replaceAll(PARAGRAPH_CLOSE, "");
+	}
+	
+	/**
 	 * Appends a new line to the current document.
 	 */
-	public void newLine() {
+	public final void newLine() {
 		buffer.append("\n");
 	}
 
@@ -70,8 +89,8 @@ public class MarkdownDocumentBuilder {
 	 * 
 	 * @param text Text to append to the document.
 	 */
-	public void text(final String text) {
-		buffer.append(text);
+	public final void text(final String text) {
+		buffer.append(filterParagraph(text));
 	}
 	
 	/**
@@ -80,7 +99,7 @@ public class MarkdownDocumentBuilder {
 	 * 
 	 * @param character Character to append to the document.
 	 */
-	public void character(final char character) {
+	public final void character(final char character) {
 		buffer.append(character);
 	}
 
@@ -90,7 +109,7 @@ public class MarkdownDocumentBuilder {
 	 * 
 	 * @param text Text to append to the document with the bold decoration.
 	 */
-	public void bold(final String text) {
+	public final void bold(final String text) {
 		buffer
 			.append(BOLD)
 			.append(text)
@@ -103,7 +122,7 @@ public class MarkdownDocumentBuilder {
 	 * 
 	 * @param text Text to append to the document with the italic decoration.
 	 */
-	public void italic(final String text) {
+	public final void italic(final String text) {
 		buffer
 			.append(ITALIC)
 			.append(text)
@@ -113,14 +132,14 @@ public class MarkdownDocumentBuilder {
 	/**
 	 * Starts a quote in the current document.
 	 */
-	public void quote() {
+	public final void quote() {
 		buffer.append(QUOTE);
 	}
 	
 	/**
 	 * Starts a list item in the current document.
 	 */
-	public void item() {
+	public final void item() {
 		buffer.append(LIST_ITEM);
 	}
 
@@ -128,7 +147,7 @@ public class MarkdownDocumentBuilder {
 	 * Appends a horizontal rule sequence 
 	 * to the current document.
 	 */
-	public void horizontalRule() {
+	public final void horizontalRule() {
 		buffer.append(HR);
 		newLine();
 	}
@@ -137,7 +156,7 @@ public class MarkdownDocumentBuilder {
 	 * Appends a horizontal rule sequence
 	 * to the current document.
 	 */
-	public void breakingReturn() {
+	public final void breakingReturn() {
 		buffer.append(BR);
 		newLine();
 	}
@@ -148,7 +167,7 @@ public class MarkdownDocumentBuilder {
 	 * 
 	 * @param level Level of the header to start.
 	 */
-	public void header(final int level) {
+	public final void header(final int level) {
 		for (int i = 0; i < level; i++) {
 			buffer.append('#');
 		}
@@ -162,14 +181,13 @@ public class MarkdownDocumentBuilder {
 	 * @param label Label of the built link.
 	 * @param url Target URL of the built link.
 	 */
-	public void rawLink(final String label, final String url) {
+	public final void rawLink(final String label, final String url) {
 		buffer
 			.append(LINK_OPEN)
 			.append('"')
 			.append(url)
 			.append('"')
 			.append('>')
-			.append(' ')
 			.append(label)
 			.append(LINK_CLOSE);
 	}
@@ -182,7 +200,7 @@ public class MarkdownDocumentBuilder {
 	 * @param label Label of the built link.
 	 * @param url Target URL of the built link.
 	 */
-	public void link(final String label, final String url) {
+	public final void link(final String label, final String url) {
 		buffer
 			.append('[').append(label).append(']')
 			.append('(').append(url).append(')');
@@ -192,7 +210,7 @@ public class MarkdownDocumentBuilder {
 	 * Appends a table row start separator
 	 * to the current document.
 	 */
-	public void startTableRow() {
+	public final void startTableRow() {
 		buffer.append(ROW_START);
 	}
 
@@ -200,7 +218,7 @@ public class MarkdownDocumentBuilder {
 	 * Appends a table cell separator
 	 * to the current document.
 	 */
-	public void cell() {
+	public final void cell() {
 		buffer.append(CELL_SEPARATOR);
 	}
 
@@ -208,7 +226,7 @@ public class MarkdownDocumentBuilder {
 	 * Appends a table row end separator
 	 * to the current document.
 	 */
-	public void endTableRow() {
+	public final void endTableRow() {
 		buffer.append(ROW_END);
 	}
 
@@ -218,7 +236,7 @@ public class MarkdownDocumentBuilder {
 	 * 
 	 * @param headers Headers to write.
 	 */
-	public void tableHeader(final String  ... headers) {
+	public final void tableHeader(final String  ... headers) {
 		tableRow(headers);
 		startTableRow();
 		for (int i = 0; i < headers.length; i++) {
@@ -237,7 +255,7 @@ public class MarkdownDocumentBuilder {
 	 * 
 	 * @param cells Cell to write.
 	 */
-	public void tableRow(final String ... cells) {
+	public final void tableRow(final String ... cells) {
 		startTableRow();
 		for (int i = 0; i < cells.length; i++) {
 			buffer.append(cells[i]);
@@ -255,7 +273,7 @@ public class MarkdownDocumentBuilder {
 	 * @return Built document content.
 	 * @see StringBuffer#toString()
 	 */
-	public String build() {
+	public final String build() {
 		return buffer.toString();
 	}
 

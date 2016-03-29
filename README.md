@@ -19,7 +19,7 @@ in your project ``POM`` :
 		<docletArtifact>
 			<groupId>fr.faylixe</groupId>
 			<artifactId>marklet</artifactId>
-			<version>1.0.3</version>
+			<version>1.0.4</version>
 		</docletArtifact>
 		<reportOutputDirectory>./</reportOutputDirectory>
 		<destDir>./</destDir>
@@ -35,7 +35,6 @@ This will generate the javadoc report into the project directory under subfolder
 
 The current version is a pre release with the following feature missing :
 
-* Link tag are not handled yet.
 * Interfaces, inner classes, enumerations, and annotations has not been tested already and subject to bug.
 
 If you do notice any other error, do not hesitate to submit pull request, or indicates it to the Gitter channel.
