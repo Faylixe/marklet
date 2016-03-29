@@ -99,6 +99,27 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 		}
 	}
 
+	private void title() {
+		header(1);
+		final StringBuilder builder = new StringBuilder();
+		if (classDoc.isInterface()) {
+			builder.append(MarkletConstant.INTERFACE);
+		}
+		else if (classDoc.isEnum()) {
+			builder.append(MarkletConstant.ENUMERATION);
+		}
+		else if (classDoc.isAnnotationType()) {
+			builder.append(MarkletConstant.ANNOTATION);
+		}
+		else {
+			builder.append(MarkletConstant.CLASS);
+		}
+		builder
+			.append(' ')
+			.append(classDoc.name());
+		text(builder.toString());
+	}
+
 	/**
 	 * Appends to the current document the class
 	 * header. Consists in the class name with a
@@ -106,12 +127,12 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 	 * the comment text.
 	 */
 	private void header() {
-		header(1);
-		text(classDoc.name());
+		title();
 		newLine();
 		final PackageDoc packageDoc = classDoc.containingPackage();
 		final String packageName = packageDoc.name();
 		text(MarkletConstant.PACKAGE);
+		character(' ');
 		link(packageName, MarkletConstant.README);
 		breakingReturn();
 		newLine();
@@ -202,8 +223,9 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 			header(4);
 			text(MarkletConstant.CONSTRUCTORS);
 			newLine();
+			tableHeader(MarkletConstant.CONSTRUCTOR_SUMMARY_HEADERS);
 			getOrderedElements(classDoc::constructors)
-				.forEach(this::itemSignature);
+				.forEach(this::rowSignature);
 			newLine();
 		}
 	}

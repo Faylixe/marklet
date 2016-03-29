@@ -9,13 +9,28 @@ package fr.faylixe.marklet;
 public final class MarkletConstant {
 
 	/** Label for package. **/
-	public static final String PACKAGE = "Package ";
+	public static final String PACKAGE = "Package";
+
+	/** Label for interface. **/
+	public static final String INTERFACE = "Interface";
+
+	/** Label for classe. **/
+	public static final String CLASS = "Class";
+
+	/** Label for annotation. **/
+	public static final String ANNOTATION = "Annotation";
+
+	/** Label for enumeration. **/
+	public static final String ENUMERATION = "Enumeration";
 
 	/** Label for interfaces. **/
 	public static final String INTERFACES = "Interfaces";
 
 	/** Label for classes. **/
 	public static final String CLASSES = "Classes";
+
+	/** Label for annotations. **/
+	public static final String ANNOTATIONS = "Annotations";
 
 	/** Label for enumerations. **/
 	public static final String ENUMERATIONS = "Enumerations";
@@ -60,6 +75,12 @@ public final class MarkletConstant {
 	public static final String [] FIELDS_SUMMARY_HEADERS = {
 		"Type and modifiers",
 		"Field name"
+	};
+	
+	/** Header labels for constructors summary. **/
+	public static final String [] CONSTRUCTOR_SUMMARY_HEADERS = {
+		"Visibility",
+		"Signature"
 	};
 
 	/** Marklet link using dynamic badge. **/

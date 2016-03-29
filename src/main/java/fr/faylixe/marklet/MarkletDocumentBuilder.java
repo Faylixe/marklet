@@ -252,8 +252,11 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 		if (element instanceof ExecutableMemberDoc) {
 			final ExecutableMemberDoc member = (ExecutableMemberDoc) element;
 			final Parameter[] parameters = member.parameters();
+			if (parameters.length == 0) { // Empty constructor case.
+				
+			}
 			for (int i = 0; i < parameters.length; i++) {
-				anchorBuilder.append(parameters[i].typeName());
+				anchorBuilder.append(parameters[i].type().simpleTypeName());
 				if (i < parameters.length - 1) {
 					anchorBuilder.append('-');
 				}

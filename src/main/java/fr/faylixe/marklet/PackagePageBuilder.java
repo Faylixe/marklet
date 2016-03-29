@@ -44,6 +44,7 @@ public final class PackagePageBuilder extends MarkletDocumentBuilder {
 	private void header() {
 		header(1);
 		text(MarkletConstant.PACKAGE);
+		character(' ');
 		text(packageDoc.name());
 		newLine();
 		description(packageDoc);
@@ -96,7 +97,7 @@ public final class PackagePageBuilder extends MarkletDocumentBuilder {
 	 * * Annotations
 	 */
 	private void indexes() {
-		// TODO : Build annotation index.
+		classIndex(MarkletConstant.ANNOTATIONS, packageDoc::annotationTypes);
 		classIndex(MarkletConstant.ENUMERATIONS, packageDoc::enums);
 		classIndex(MarkletConstant.INTERFACES, packageDoc::interfaces);
 		classIndex(MarkletConstant.CLASSES, packageDoc::allClasses);
