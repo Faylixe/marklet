@@ -188,9 +188,19 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	 * 
 	 * @param doc Documentation element to process description from.
 	 */
-	// TODO : Consider using raw text directly ?
 	public void description(final Doc doc) {
-		for (final Tag tag : doc.inlineTags()) {
+		description(doc.inlineTags());
+	}
+
+	/**
+	 * This methods will process the given ``doc``
+	 * comment text, by replacing each link tags
+	 * by effective markdown link.
+	 * 
+	 * @param doc Documentation element to process description from.
+	 */
+	public void description(final Tag [] inlineTags) {
+		for (final Tag tag : inlineTags) {
 			if (("Text").equals(tag.name())) {
 				text(tag.text());
 			}
@@ -201,11 +211,11 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 					classLink(source, classDoc);
 				}
 				else {
+					// TODO : Process other link type here.
 					text(tag.text());
 				}
 			}
 		}
-		//text(doc.commentText());
 	}
 
 	/**
@@ -222,6 +232,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 		if (element.isMethod()) {
 			final MethodDoc method = (MethodDoc) element;
 			character(' ');
+			// TODO : Consider using source instance instead.
 			typeLink(method.containingPackage(), method.returnType());
 		}
 	}
@@ -400,7 +411,8 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 				// TODO : Think about including parameter Type here.
 				text(parameter.parameterName());
 				text(PARAMETER_DETAIL_SEPARATOR);
-				text(parameter.parameterComment());
+				description(parameter.inlineTags());
+				//text(parameter.parameterComment()); // TODO : Convert to Doc / for linked tag ? 
 				newLine();
 			}
 			newLine();
@@ -422,8 +434,8 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 			bold(MarkletConstant.RETURNS);
 			newLine();
 			item();
-			 // TODO : Link processing ?
-			text(tag[0].text());
+			// text(tag[0].text());
+			description(tag[0].inlineTags());
 			newLine();
 			newLine();
 		}
@@ -444,7 +456,8 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 				item();
 				classLink(source, exception.exception());
 				character(' ');
-				text(exception.exceptionComment());
+				description(exception.inlineTags());
+				//text(exception.exceptionComment());
 				newLine();
 			}
 			newLine();
