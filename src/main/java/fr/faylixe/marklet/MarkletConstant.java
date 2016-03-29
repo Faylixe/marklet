@@ -89,6 +89,9 @@ public final class MarkletConstant {
 	/** Markdown sequence for cell separator. **/
 	public static final String TABLE_SEPARATOR = " | ";
 
+	/** Header label for the interface hierachy. **/
+	public static final String INTERFACE_HIEARCHY_HEADER = "All implemented interfaces :";
+
 	/**
 	 * Private constructor for avoiding instantiation.
 	 */

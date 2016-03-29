@@ -165,7 +165,15 @@ public final class Marklet {
 	public static boolean start(final RootDoc root) {
 		final MarkletOptions options = MarkletOptions.parse(root.options());
 		final Marklet marklet = new Marklet(options, root);
-		return marklet.start();
+		boolean result = false;
+		try {
+			result = marklet.start();
+		}
+		catch (final Exception e) {
+			root.printError("An exception has been caught during generation (see stack trace below).");
+			e.printStackTrace();
+		}
+		return result;
 	}
 
 }

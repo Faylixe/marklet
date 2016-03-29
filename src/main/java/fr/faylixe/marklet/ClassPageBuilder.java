@@ -5,7 +5,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -14,6 +16,7 @@ import com.sun.javadoc.Doc;
 import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.MethodDoc;
 import com.sun.javadoc.PackageDoc;
+import com.sun.javadoc.Type;
 
 /**
  * Builder that aims to create documentation
@@ -74,8 +77,8 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 	 * @param methodDoc
 	 * @return
 	 */
-	private boolean isInherited(final MethodDoc methodDoc) {
-		return !methodDoc.commentText().equals("{@inheritDoc}");
+	private boolean isNotInherited(final MethodDoc methodDoc) {
+		return methodDoc.overriddenMethod() == null;
 	}
 
 	/**
@@ -83,7 +86,7 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 	 * from the current class. Such hierarchy consists in the
 	 * class inheritance path.
 	 */
-	private void hierachy() {
+	private void classHierachy() {
 		final List<ClassDoc> hierarchy = new ArrayList<ClassDoc>();
 		ClassDoc current = classDoc;
 		while (current != null) {
@@ -92,13 +95,46 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 		}
 		quote();
 		for (int i = hierarchy.size() - 1; i >= 0; i--) {
-			classLink(classDoc.containingPackage(), hierarchy.get(i));
+			classLink(getSource(), hierarchy.get(i));
 			if (i > 0) {
 				text(HIERARCHY_SEPARATOR);
 			}
 		}
 	}
 
+	/**
+	 * Appends to the current document the interface hierarchy
+	 * from the current class. Such hiearchy consists in all
+	 * implemented interface.
+	 */
+	private void interfaceHierachy() {
+		final Set<Type> implementedInterfaces = new HashSet<Type>();
+		ClassDoc current = classDoc;
+		while (current != null) {
+			implementedInterfaces.addAll(Arrays.asList(current.interfaceTypes()));
+			current = current.superclass();
+		}
+		if (!implementedInterfaces.isEmpty()) {
+			text(MarkletConstant.INTERFACE_HIEARCHY_HEADER);
+			newLine();
+			quote();
+			final int limit = implementedInterfaces.size() - 1;
+			final Type [] types = implementedInterfaces.toArray(new Type[implementedInterfaces.size()]);
+			for (int i = 0; i < types.length; i++) {
+				typeLink(getSource(), types[i]);
+				if (i < limit) {
+					character(',');
+					character(' ');
+				}
+			}
+		}
+	}
+
+	/**
+	 * Appends to the current document it title, which consists
+	 * in the type of the target documentation (interface, enumeration,
+	 * annotation or class) and it name.
+	 */
 	private void title() {
 		header(1);
 		final StringBuilder builder = new StringBuilder();
@@ -136,10 +172,14 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 		link(packageName, MarkletConstant.README);
 		breakingReturn();
 		newLine();
-		hierachy();
+		classHierachy();
+		newLine();
+		newLine();
+		interfaceHierachy();
 		newLine();
 		newLine();
 		description(classDoc);
+		newLine();
 		newLine();
 	}
 
@@ -169,7 +209,7 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 			newLine();
 			tableHeader(MarkletConstant.METHODS_SUMMARY_HEADERS);
 			getOrderedElements(classDoc::methods)
-				.filter(this::isInherited)
+				.filter(this::isNotInherited)
 				.forEach(this::rowSignature);
 			newLine();
 		}
@@ -187,7 +227,7 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 			classLink(getSource(), current);
 			newLine();
 			for (final MethodDoc methodDoc : current.methods()) {
-				link(methodDoc.flatSignature(), ""); // TODO : Build method link.
+				link(methodDoc.flatSignature(), ""); // TODO : Build method link ?.
 			}
 			current = current.superclass();
 		}
@@ -293,7 +333,7 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 			text(MarkletConstant.METHODS);
 			newLine();
 			getOrderedElements(classDoc::methods)
-				.filter(this::isInherited)
+				.filter(this::isNotInherited)
 				.forEach(this::member);
 		}
 	}
