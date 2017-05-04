@@ -86,7 +86,7 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 	 * from the current class. Such hierarchy consists in the
 	 * class inheritance path.
 	 */
-	private void classHierachy() {
+	private void classHierarchy() {
 		final List<ClassDoc> hierarchy = new ArrayList<ClassDoc>();
 		ClassDoc current = classDoc;
 		while (current != null) {
@@ -107,7 +107,7 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 	 * from the current class. Such hiearchy consists in all
 	 * implemented interface.
 	 */
-	private void interfaceHierachy() {
+	private void interfaceHierarchy() {
 		final Set<Type> implementedInterfaces = new HashSet<Type>();
 		ClassDoc current = classDoc;
 		while (current != null) {
@@ -172,10 +172,10 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 		link(packageName, MarkletConstant.README);
 		breakingReturn();
 		newLine();
-		classHierachy();
+		classHierarchy();
 		newLine();
 		newLine();
-		interfaceHierachy();
+		interfaceHierarchy();
 		newLine();
 		newLine();
 		description(classDoc);
