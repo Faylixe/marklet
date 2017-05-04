@@ -32,6 +32,24 @@ in your project ``POM`` :
 
 This will generate the javadoc report into the project directory under subfolder ``javadoc/``.
 
+## Developing Marklet
+
+Marklet requires Apache Maven. In order to build, run
+```
+$ mvn install
+
+```
+
+In order to generate Markdown documentation for Marklet itself, run
+
+```
+$ mvn -P marklet-generation javadoc:javadoc
+```
+
+## License
+
+Marklet is licensed under the Apache License, Version 2.0
+
 ## Current issues
 
 The current version is a pre release with the following feature missing :
