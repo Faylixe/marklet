@@ -83,7 +83,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 			urlBuilder
 				.append(path)
 				.append(target.simpleTypeName())
-				.append(MarkdownDocumentBuilder.FILE_EXTENSION);
+				.append(MarkdownDocumentBuilder.LINK_EXTENSION);
 			link(target.simpleTypeName(), urlBuilder.toString());
 		}
 		else {

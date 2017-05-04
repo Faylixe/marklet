@@ -172,7 +172,7 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 		item();
 		text(MarkletConstant.PACKAGE);
 		character(' ');
-		link(packageName, MarkletConstant.README);
+		link(packageName, MarkletConstant.README_LINK);
 		newLine();
 		item();
 		classHierarchy();
@@ -180,6 +180,8 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 		newLine();
 		newLine();
 		description(classDoc);
+		newLine();
+		newLine();
 	}
 
 	/**

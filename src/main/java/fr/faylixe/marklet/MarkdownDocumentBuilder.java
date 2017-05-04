@@ -10,8 +10,11 @@ package fr.faylixe.marklet;
  */
 public class MarkdownDocumentBuilder {
 
-	/** Extension used for markdown file. **/
-	public static final String FILE_EXTENSION = ".md";
+	/** Extension used for linked file. **/
+	public static final String LINK_EXTENSION = ".html";
+
+	/** Extension used for generated markdown file. **/
+	public static final String FILE_EXTENSION = ".html.md";
 
 	/** Bold text decoration. **/
 	private static final String BOLD = "**";

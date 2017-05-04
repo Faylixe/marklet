@@ -116,7 +116,7 @@ public final class PackagePageBuilder extends MarkletDocumentBuilder {
 		final PackagePageBuilder packageBuilder = new PackagePageBuilder( packageDoc);
 		packageBuilder.header();
 		packageBuilder.indexes();
-		final Path path = directoryPath.resolve(MarkletConstant.README);
+		final Path path = directoryPath.resolve(MarkletConstant.README_FILE);
 		packageBuilder.build(path);
 	}
 
