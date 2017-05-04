@@ -32,7 +32,7 @@ in your project ``POM`` :
 
 This will generate the javadoc report into the project directory under subfolder ``javadoc/``.
 
-##Current issues
+## Current issues
 
 The current version is a pre release with the following feature missing :
 
