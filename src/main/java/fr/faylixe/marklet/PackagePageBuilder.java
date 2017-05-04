@@ -66,7 +66,7 @@ public final class PackagePageBuilder extends MarkletDocumentBuilder {
 			header(2);
 			text(label);
 			newLine();
-			tableHeader(MarkletConstant.NAME);
+			tableHeader(MarkletConstant.NAME, "Description");
 			Arrays
 				.stream(classDocs)
 				.forEach(this::classRow);
@@ -83,6 +83,8 @@ public final class PackagePageBuilder extends MarkletDocumentBuilder {
 	private void classRow(final ClassDoc classDoc) {
 		startTableRow();
 		classLink(packageDoc, classDoc);
+		cell();
+		text(classDoc.commentText().replaceAll("\\n"," ").replaceFirst("\\..*","."));
 		endTableRow();
 		newLine();
 	}
