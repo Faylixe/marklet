@@ -171,6 +171,7 @@ public class MarkdownDocumentBuilder {
 		for (int i = 0; i < level; i++) {
 			buffer.append('#');
 		}
+		buffer.append(' ');
 	}
 
 	/**
