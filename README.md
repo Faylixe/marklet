@@ -4,7 +4,7 @@
 
 **Marklet** is a custom Java Doclet which aims to generate a Javadoc in a markdown format which is ready to use in GitHub. You can check a **Marklet** generated javadoc on the following project :
 
-* [Marklet itself !](https://github.com/Faylixe/marklet/tree/master/javadoc/fr/faylixe/marklet)
+* [Marklet itself!](https://github.com/Faylixe/marklet/tree/master/javadoc/fr/faylixe/marklet)
 * [Google Code Jam API](https://github.com/Faylixe/googlecodejam-client/tree/master/javadoc/fr/faylixe/googlecodejam/client)
 
 In order to use it with Maven, adds the following configuration for the ``maven-javadoc-plugin``
@@ -32,7 +32,25 @@ in your project ``POM`` :
 
 This will generate the javadoc report into the project directory under subfolder ``javadoc/``.
 
-##Current issues
+## Developing Marklet
+
+Marklet requires Apache Maven. In order to build, run
+```
+$ mvn install
+
+```
+
+In order to generate Markdown documentation for Marklet itself, run
+
+```
+$ mvn -P marklet-generation javadoc:javadoc
+```
+
+## License
+
+Marklet is licensed under the Apache License, Version 2.0
+
+## Current issues
 
 The current version is a pre release with the following feature missing :
 
