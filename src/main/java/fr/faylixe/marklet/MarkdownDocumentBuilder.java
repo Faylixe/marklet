@@ -10,11 +10,17 @@ package fr.faylixe.marklet;
  */
 public class MarkdownDocumentBuilder {
 
-	/** Extension used for markdown file. **/
-	public static final String FILE_EXTENSION = ".md";
+	/** Extension used for linked file. **/
+	public static final String LINK_EXTENSION = ".html";
+
+	/** Extension used for generated markdown file. **/
+	public static final String FILE_EXTENSION = ".html.md";
 
 	/** Bold text decoration. **/
 	private static final String BOLD = "**";
+
+	/** Inline code snippets **/
+	private static final String CODE = "`";
 
 	/** Italic text decoration. **/
 	private static final String ITALIC = "*";
@@ -114,6 +120,17 @@ public class MarkdownDocumentBuilder {
 			.append(BOLD)
 			.append(text)
 			.append(BOLD);
+	}
+
+	/** Apppends this given `text` to the current document with a
+	 * code decoration.
+	 * @param text code snippet to add to the document
+	 */
+	public final void code(final String text) {
+		buffer
+			.append(CODE)
+			.append(text)
+			.append(CODE);
 	}
 	
 	/**

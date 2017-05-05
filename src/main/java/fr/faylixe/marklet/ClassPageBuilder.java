@@ -93,7 +93,7 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 			hierarchy.add(current);
 			current = current.superclass();
 		}
-		quote();
+
 		for (int i = hierarchy.size() - 1; i >= 0; i--) {
 			classLink(getSource(), hierarchy.get(i));
 			if (i > 0) {
@@ -117,7 +117,7 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 		if (!implementedInterfaces.isEmpty()) {
 			text(MarkletConstant.INTERFACE_HIEARCHY_HEADER);
 			newLine();
-			quote();
+			item();
 			final int limit = implementedInterfaces.size() - 1;
 			final Type [] types = implementedInterfaces.toArray(new Type[implementedInterfaces.size()]);
 			for (int i = 0; i < types.length; i++) {
@@ -165,16 +165,17 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 	private void header() {
 		title();
 		newLine();
+		newLine();
+
 		final PackageDoc packageDoc = classDoc.containingPackage();
 		final String packageName = packageDoc.name();
+		item();
 		text(MarkletConstant.PACKAGE);
 		character(' ');
-		link(packageName, MarkletConstant.README);
-		breakingReturn();
+		link(packageName, MarkletConstant.README_LINK);
 		newLine();
+		item();
 		classHierarchy();
-		newLine();
-		newLine();
 		interfaceHierarchy();
 		newLine();
 		newLine();
@@ -284,7 +285,6 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 			fieldsSummary();
 			constructorsSummary();
 			methodsSummary();
-			horizontalRule();
 			newLine();
 		}
 	}
@@ -296,7 +296,7 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 	private void constructors() {
 		if (hasConstructor()) {
 			newLine();
-			header(2);
+			header(1);
 			text(MarkletConstant.CONSTRUCTORS);
 			newLine();
 			getOrderedElements(classDoc::constructors).forEach(this::member);
@@ -310,7 +310,7 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 	private void fields() {
 		if (hasField()) {
 			newLine();
-			header(2);
+			header(1);
 			text(MarkletConstant.FIELDS);
 			newLine();
 			getOrderedElements(classDoc::fields)
@@ -329,7 +329,7 @@ public final class ClassPageBuilder extends MarkletDocumentBuilder {
 	private void methods() {
 		if (hasMethod()) {
 			newLine();
-			header(2);
+			header(1);
 			text(MarkletConstant.METHODS);
 			newLine();
 			getOrderedElements(classDoc::methods)

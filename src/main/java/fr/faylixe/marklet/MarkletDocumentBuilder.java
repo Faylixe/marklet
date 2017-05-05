@@ -43,7 +43,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	private static final String UP_DIRECTORY = "../";
 
 	/** Separator used between parameter name and description. **/
-	private static final String PARAMETER_DETAIL_SEPARATOR = " : ";
+	private static final String PARAMETER_DETAIL_SEPARATOR = ": ";
 
 	/** Target source package from which document will be written. **/
 	private final PackageDoc source;
@@ -83,7 +83,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 			urlBuilder
 				.append(path)
 				.append(target.simpleTypeName())
-				.append(MarkdownDocumentBuilder.FILE_EXTENSION);
+				.append(MarkdownDocumentBuilder.LINK_EXTENSION);
 			link(target.simpleTypeName(), urlBuilder.toString());
 		}
 		else {
@@ -106,7 +106,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	 */
 	public void typeLink(final PackageDoc source, final Type type) {
 		if (type.isPrimitive()) {
-			bold(type.simpleTypeName());
+			code(type.simpleTypeName());
 		}
 		else {
 			final ClassDoc classDoc = type.asClassDoc();
@@ -228,7 +228,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	 * @param element Member to build return label for.
 	 */
 	public void returnSignature(final ProgramElementDoc element) {
-		bold(element.modifiers());
+		code(element.modifiers());
 		if (element.isMethod()) {
 			final MethodDoc method = (MethodDoc) element;
 			character(' ');
@@ -294,7 +294,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	 * @param member Member to write signature from.
 	 */
 	private void headerSignature(final ExecutableMemberDoc member) {
-		header(4);
+		header(2);
 		text(member.name());
 		text(member.flatSignature());
 	}
@@ -348,20 +348,17 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	 * @param fieldDoc Field documentation to append.
 	 */
 	public void field(final FieldDoc fieldDoc) {
-		header(4);
+		header(2);
 		text(fieldDoc.name());
 		newLine();
-		quote();
-		bold(fieldDoc.modifiers());
+		code(fieldDoc.modifiers());
 		character(' ');
 		typeLink(source, fieldDoc.type());
 		newLine();
 		newLine();
-		quote();
 		description(fieldDoc);
 		newLine();
 		newLine();
-		horizontalRule();
 		newLine();
 	}
 
@@ -380,7 +377,6 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	public void member(final ExecutableMemberDoc member) {
 		headerSignature(member);
 		newLine();
-		quote();
 		description(member);
 		newLine();
 		newLine();
@@ -391,7 +387,6 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 		}
 		exceptions(member.throwsTags());
 		newLine();
-		horizontalRule();
 		newLine();
 	}
 
@@ -406,13 +401,13 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	 */
 	private void parameters(final ParamTag[] parameters) {
 		if (parameters.length > 0) {
-			quote();
+			header(3);
 			bold(MarkletConstant.PARAMETERS);
 			newLine();
 			for (final ParamTag parameter : parameters) {
 				item();
 				// TODO : Think about including parameter Type here.
-				text(parameter.parameterName());
+				code(parameter.parameterName());
 				text(PARAMETER_DETAIL_SEPARATOR);
 				description(parameter.inlineTags());
 				//text(parameter.parameterComment()); // TODO : Convert to Doc / for linked tag ? 
@@ -433,10 +428,9 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	 */
 	private void returnType(final Tag[] tag) {
 		if (tag.length > 0) {
-			quote();
+			header(3);
 			bold(MarkletConstant.RETURNS);
 			newLine();
-			item();
 			// text(tag[0].text());
 			description(tag[0].inlineTags());
 			newLine();
@@ -452,7 +446,7 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	 */
 	private void exceptions(final ThrowsTag[] exceptions) {
 		if (exceptions.length > 0) {
-			quote();
+			header(3);
 			bold(MarkletConstant.THROWS);
 			newLine();
 			for (final ThrowsTag exception : exceptions) {
@@ -476,7 +470,6 @@ public class MarkletDocumentBuilder extends MarkdownDocumentBuilder {
 	 * @throws IOException If any error occurs while closing document.
 	 */
 	public void build(final Path path) throws IOException {
-		horizontalRule();
 		newLine();
 		text(MarkletConstant.BADGE);
 		final String content = super.build();
