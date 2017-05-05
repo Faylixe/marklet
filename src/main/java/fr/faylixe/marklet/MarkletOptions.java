@@ -6,7 +6,15 @@ import com.sun.javadoc.DocErrorReporter;
  * Class that reads and stores provided options
  * for javadoc execution. Options that we care about are :
  * 
- * * Output directory
+ * * `-d` specifies the output directory (default: `javadocs`)
+ * * `-e` specifies the file ending for files to be created (default `md`)
+ * * `-l` specifies the file ending used in internal links (default `md`)
+ *
+ * > The default options are ideal if you want to serve the documentation using GitHub's
+ * > built-in README rendering. If you are using a tool like Slate, change the options as follows:
+ * ```
+ * $ javadoc -doclet fr.faylixe.marklet.Marklet -e html.md -l html …
+ * ```
  * 
  * @author fv
  */
@@ -18,15 +26,33 @@ public final class MarkletOptions {
 	/** Option name for the target output directory. **/
 	private static final String OUTPUT_DIRECTORY_OPTION = "-d";
 
+	/** Default output file ending (`md`) **/
+	private static final String DEFAULT_FILE_ENDING = "md";
+
+	/** Option name for the file ending (`-e`) **/
+	private static final String FILE_ENDING_OPTION = "-e";
+
+	/** Default ending for internal links (`md`). **/
+	private static final String DEFAULT_LINK_ENDING = "md";
+
+	/** Option name for the link ending (`-l`) **/
+	private static final String LINK_ENDING_OPTION = "-l";
+
 	/** Output directory file are generated in. **/
 	private String outputDirectory;
 
+	private String fileEnding;
+
+	private String linkEnding;
+
 	/**
 	 * Default constructor.
-	 * Sets options with their default parameters if availaible.
+	 * Sets options with their default parameters if available.
 	 */
 	private MarkletOptions() {
 		this.outputDirectory = DEFAULT_OUTPUT_DIRECTORY;
+		this.fileEnding = DEFAULT_FILE_ENDING;
+		this.linkEnding = DEFAULT_LINK_ENDING;
 	}
 
 	/**
@@ -86,9 +112,30 @@ public final class MarkletOptions {
 			if (name.equals(OUTPUT_DIRECTORY_OPTION)) {
 				System.out.println("Matching output directory : " + option[1]);
 				options.setOutputDirectory(option[1]);
+			} else if (name.equals(LINK_ENDING_OPTION)) {
+				System.out.println("Matching link ending : " + option[1]);
+				options.setLinkEnding(option[1]);
+			} else if (name.equals(FILE_ENDING_OPTION)) {
+				System.out.println("Matching file ending : " + option[1]);
+				options.setFileEnding(option[1]);
 			}
 		}
 		return options;
 	}
 
+	public String getFileEnding() {
+		return fileEnding;
+	}
+
+	public void setFileEnding(String fileEnding) {
+		this.fileEnding = fileEnding;
+	}
+
+	public String getLinkEnding() {
+		return linkEnding;
+	}
+
+	public void setLinkEnding(String linkEnding) {
+		this.linkEnding = linkEnding;
+	}
 }
