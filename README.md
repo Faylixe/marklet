@@ -20,7 +20,7 @@ in your project ``POM`` :
 		<docletArtifact>
 			<groupId>fr.faylixe</groupId>
 			<artifactId>marklet</artifactId>
-			<version>1.0.5</version>
+			<version>1.1.0</version>
 		</docletArtifact>
 		<reportOutputDirectory>./</reportOutputDirectory>
 		<destDir>./</destDir>
@@ -31,6 +31,18 @@ in your project ``POM`` :
 ```
 
 This will generate the javadoc report into the project directory under subfolder ``javadoc/``.
+
+## Java8 doclint issues.
+
+If you are using Java8 you may have some issues with doclint validation especially when using markdown
+blockquotes syntax. To deal with it, just add the following directive to your ``pom.xml`` file to desactivate
+doclint :
+
+```xml
+<properties>
+    <additionalparam>-Xdoclint:none</additionalparam>
+</properties>
+```
 
 ## Developing Marklet
 
