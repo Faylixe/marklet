@@ -35,7 +35,7 @@ This will generate the javadoc report into the project directory under subfolder
 ## Java8 doclint issues.
 
 If you are using Java8 you may have some issues with doclint validation especially when using markdown
-blockquotes syntax. To deal with it, just add the following directive to your ``pom.xml`` file to desactivate
+blockquotes syntax. To deal with it, just add the following directive to your ``pom.xml`` file to deactivate
 doclint :
 
 ```xml
