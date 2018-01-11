@@ -45,6 +45,9 @@
 	<profiles>
 		<profile>
 			<id>release</id>
+			<properties>
+            	<additionalparam>-Xdoclint:none</additionalparam>
+        	</properties>
 			<build>
 				<plugins>
 					<plugin>

@@ -78,9 +78,9 @@ public final class MarkletOptions {
 	/**
 	 * TODO : Perform validation.
 	 * 
-	 * @param options
-	 * @param reporter
-	 * @return
+	 * @param options Options from command line.
+	 * @param reporter Reporter instance to use in case of error.
+	 * @return <tt>true</tt> if given set of options are valid, <tt>false</tt> otherwise.
 	 */
 	public static boolean validOptions(final String options[][], final DocErrorReporter reporter) {
 		return true;
@@ -88,8 +88,8 @@ public final class MarkletOptions {
 	
 	/**
 	 * TODO : Process other option.
-	 * @param option
-	 * @return
+	 * @param option To document.
+	 * @return To document.
 	 */
 	public static int optionLength(final String option) {
 		if (option.equals(OUTPUT_DIRECTORY_OPTION)) {

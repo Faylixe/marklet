@@ -109,7 +109,7 @@ public final class Marklet {
 
 	/**
 	 * 
-	 * @return
+	 * @return <tt>true</tt> if generation was successfull, <tt>false</tt> otherwise.
 	 */
 	private boolean start() {
 		try {
@@ -129,19 +129,21 @@ public final class Marklet {
 	}
 
 	/**
+	 * To document.
 	 * 
-	 * @param option
-	 * @return
+	 * @param option To document.
+	 * @return To document.
 	 */
 	public static int optionLength(final String option) {
 		return MarkletOptions.optionLength(option);
 	}
 
 	/**
-	 * 
-	 * @param options
-	 * @param reporter
-	 * @return
+	 * To document.
+	 *
+	 * @param options Options from command line.
+	 * @param reporter Reporter instance to use in case of error.
+	 * @return <tt>true</tt> if given set of options are valid, <tt>false</tt> otherwise.
 	 */
 	public static boolean validOptions(final String options[][], final DocErrorReporter reporter) {
 		return MarkletOptions.validOptions(options, reporter);
@@ -149,7 +151,7 @@ public final class Marklet {
 	
 	/**
 	 * 
-	 * @return
+	 * @return LanguageVersion supported.
 	 */
 	public static LanguageVersion languageVersion() {
 		return LanguageVersion.JAVA_1_5;
