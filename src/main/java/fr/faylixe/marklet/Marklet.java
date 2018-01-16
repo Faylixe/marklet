@@ -114,7 +114,7 @@ public final class Marklet {
 	private boolean start() {
 		try {
 			final Path outputDirectory = Paths.get(options.getOutputDirectory());
-			System.out.println("Target output directory : " + outputDirectory.toAbsolutePath().toString());
+			root.printNotice("Target output directory : " + outputDirectory.toAbsolutePath().toString());
 			if (!Files.exists(outputDirectory)) {
 				Files.createDirectories(outputDirectory);
 			}
@@ -165,7 +165,7 @@ public final class Marklet {
 	 * @return ``true`` if the generation went well, ``false`` otherwise.
 	 */
 	public static boolean start(final RootDoc root) {
-		final MarkletOptions options = MarkletOptions.parse(root.options());
+		final MarkletOptions options = MarkletOptions.parse(root);
 		final Marklet marklet = new Marklet(options, root);
 		boolean result = false;
 		try {
